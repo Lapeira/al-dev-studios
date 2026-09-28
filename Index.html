@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AL Dev Studios | Alexandre Sousa - Frontend Developer & Web Solutions</title>
+  <meta name="description" content="AL Dev Studios por Alexandre Sousa. Criação de websites modernos, lojas online, dashboards de métricas, plataformas para clubes desportivos e projetos personalizados." />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fontes Google -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
+
+  <!-- Ícones Lucide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .font-serif-italic {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+    }
+    :root {
+      --spotlight-size: 260px;
+    }
+    @media (max-width: 640px) {
+      :root {
+        --spotlight-size: 160px;
+      }
+    }
+    /* Efeito de máscara radial que segue o cursor */
+    .reveal-layer {
+      -webkit-mask-image: radial-gradient(
+        circle var(--spotlight-size) at var(--mouse-x, -500px) var(--mouse-y, -500px),
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.85) 45%,
+        rgba(0, 0, 0, 0) 100%
+      );
+      mask-image: radial-gradient(
+        circle var(--spotlight-size) at var(--mouse-x, -500px) var(--mouse-y, -500px),
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.85) 45%,
+        rgba(0, 0, 0, 0) 100%
+      );
+      opacity: var(--reveal-opacity, 0);
+      transition: opacity 0.25s ease-out;
+    }
+  </style>
+</head>
+<body class="bg-[#fafafa] text-zinc-900 selection:bg-zinc-900 selection:text-white">
+
+  <!-- ======================================================== -->
+  <!-- 1. HERO SECTION (INTERATIVO COM SPOTLIGHT)               -->
+  <!-- ======================================================== -->
+  <section id="inicio" class="relative min-h-[92vh] flex flex-col justify-between overflow-hidden bg-white border-b border-zinc-200/80">
+    <!-- Camada Esboço / Preto e Branco -->
+    <div class="absolute inset-0 pointer-events-none z-0">
+      <img 
+        src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=2000&q=80" 
+        alt="Fundo Esboço" 
+        class="w-full h-full object-cover filter grayscale contrast-125 opacity-70"
+      />
+    </div>
+
+    <!-- Camada a Cores Revelada pelo Cursor -->
+    <div class="absolute inset-0 pointer-events-none z-0 reveal-layer">
+      <img 
+        src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=2000&q=80" 
+        alt="Fundo Colorido" 
+        class="w-full h-full object-cover"
+      />
+    </div>
+
+    <!-- Conteúdo da Hero -->
+    <header class="relative z-10 p-6 md:p-14 max-w-2xl">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 text-white text-xs font-bold tracking-wider uppercase">
+          <i data-lucide="code-2" class="w-3.5 h-3.5 text-emerald-400"></i>
+          AL Dev Studios
+        </div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Disponível para novos projetos
+        </div>
+      </div>
+
+      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-zinc-950 mb-4 leading-tight">
+        Frontend Developer & Web Solutions
+      </h1>
+
+      <p class="text-zinc-700 text-base sm:text-lg leading-relaxed mb-8">
+        Olá, sou o <span class="font-serif-italic font-semibold underline underline-offset-4 decoration-zinc-400">Alexandre Sousa</span>. Desenvolvo websites modernos, lojas online, painéis de métricas e soluções sob medida para empresas e clubes desportivos com foco em usabilidade, velocidade e impacto visual.
+      </p>
+
+      <!-- Botões de Ação com Redes Reais e SVGs Nativos -->
+      <div class="flex flex-wrap items-center gap-3">
+        <a href="#contacto" class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-800 transition-all shadow-sm active:scale-95">
+          Pedir Orçamento Gratuito
+        </a>
+        
+        <!-- WhatsApp Oficial -->
+        <a 
+          href="https://wa.me/351965180804?text=Ol%C3%A1%20Alexandre,%20gostaria%20de%20falar%20sobre%20um%20projeto%20com%20a%20AL%20Dev%20Studios." 
+          target="_blank" 
+          rel="noreferrer"
+          class="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#25D366] text-white text-sm font-semibold hover:bg-[#20bd5a] transition-all shadow-sm active:scale-95"
+        >
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+          </svg>
+          WhatsApp
+        </a>
+
+        <!-- GitHub Oficial -->
+        <a 
+          href="https://github.com/Lapeira" 
+          target="_blank" 
+          rel="noreferrer" 
+          aria-label="GitHub de Alexandre Sousa" 
+          class="w-11 h-11 rounded-full border border-zinc-200 bg-white/95 backdrop-blur-sm flex items-center justify-center text-zinc-800 hover:bg-zinc-100 hover:text-black hover:scale-105 transition-all shadow-sm"
+        >
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+        </a>
+
+        <!-- LinkedIn Oficial -->
+        <a 
+          href="https://www.linkedin.com/in/alexandre-sousa-a750042ab" 
+          target="_blank" 
+          rel="noreferrer" 
+          aria-label="LinkedIn de Alexandre Sousa" 
+          class="w-11 h-11 rounded-full border border-zinc-200 bg-white/95 backdrop-blur-sm flex items-center justify-center text-[#0A66C2] hover:bg-zinc-100 hover:scale-105 transition-all shadow-sm"
+        >
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+          </svg>
+        </a>
+      </div>
+    </header>
+
+    <div class="relative z-10 flex justify-center pb-6 text-zinc-400 animate-bounce">
+      <a href="#servicos" aria-label="Descer para serviços">
+        <i data-lucide="chevron-down" class="w-5 h-5"></i>
+      </a>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 2. SERVIÇOS DA AL DEV STUDIOS                            -->
+  <!-- ======================================================== -->
+  <section id="servicos" class="py-20 px-6 md:px-14 max-w-6xl mx-auto">
+    <div class="text-center max-w-2xl mx-auto mb-14">
+      <span class="text-xs font-bold text-zinc-500 tracking-wider uppercase">Soluções Digitais</span>
+      <h2 class="text-2xl sm:text-4xl font-extrabold text-zinc-950 mt-2 mb-3">O que construo para o seu negócio</h2>
+      <p class="text-zinc-600 text-sm sm:text-base">
+        Aplicações e websites modernos desenvolvidos para carregamento rápido, controlo intuitivo e impacto visual.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      
+      <!-- Serviço 1: Websites & Lojas Online -->
+      <div class="p-8 rounded-2xl bg-white border border-zinc-200/80 shadow-sm hover:shadow-md transition-all">
+        <div class="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-900 mb-6">
+          <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-lg font-bold text-zinc-900 mb-2">Websites & Lojas Online</h3>
+        <p class="text-zinc-600 text-sm leading-relaxed mb-4">
+          Páginas institucionais, montras de produtos e lojas digitais com navegação rápida, preparadas para destacar a sua marca no mercado.
+        </p>
+        <ul class="text-xs text-zinc-500 space-y-2 border-t border-zinc-100 pt-4">
+          <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Catálogos e filtros em tempo real</li>
+          <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Otimização para telemóveis e SEO</li>
+        </ul>
+      </div>
+
+      <!-- Serviço 2: Dashboards de Métricas & Gestão -->
+      <div class="p-8 rounded-2xl bg-white border border-zinc-200/80 shadow-sm hover:shadow-md transition-all">
+        <div class="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-900 mb-6">
+          <i data-lucide="line-chart" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-lg font-bold text-zinc-900 mb-2">Dashboards, Métricas & Gestão</h3>
+        <p class="text-zinc-600 text-sm leading-relaxed mb-4">
+          Painéis visuais com medidores de métricas, gráficos e indicadores de desempenho para empresas e controlo de atletas em clubes desportivos.
+        </p>
+        <ul class="text-xs text-zinc-500 space-y-2 border-t border-zinc-100 pt-4">
+          <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Medidores e gráficos dinâmicos</li>
+          <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Organização clara de dados e equipas</li>
+        </ul>
+      </div>
+
+      <!-- Serviço 3: Modernização & Performance -->
+      <div class="p-8 rounded-2xl bg-white border border-zinc-200/80 shadow-sm hover:shadow-md transition-all">
+        <div class="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-900 mb-6">
+          <i data-lucide="zap" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-lg font-bold text-zinc-900 mb-2">Modernização de Interfaces</h3>
+        <p class="text-zinc-600 text-sm leading-relaxed mb-4">
+          Renovação visual de sistemas ou websites obsoletos, tornando-os ultrarrápidos e intuitivos com tecnologias modernas como React e Tailwind.
+        </p>
+        <ul class="text-xs text-zinc-500 space-y-2 border-t border-zinc-100 pt-4">
+          <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Carregamento instantâneo</li>
+          <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Código modular e escalável</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 3. PROJETOS EM DESTAQUE (3 PROJETOS SELECIONADOS)        -->
+  <!-- ======================================================== -->
+  <section id="projetos" class="py-20 px-6 md:px-14 bg-zinc-100/60 border-t border-b border-zinc-200">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+        <div>
+          <span class="text-xs font-bold text-zinc-500 tracking-wider uppercase">Casos Práticos & Soluções</span>
+          <h2 class="text-2xl sm:text-4xl font-extrabold text-zinc-950 mt-1">Interfaces & Projetos</h2>
+        </div>
+        <p class="text-sm text-zinc-500 max-w-sm mt-2 md:mt-0">
+          Aplicações e soluções construídas para resolver desafios reais de negócio e métricas.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+
+        <!-- Projeto 1: Catálogo & Loja Digital -->
+        <article class="flex flex-col justify-between bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">E-commerce / Lojas</span>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700">Concluído</span>
+            </div>
+            <h3 class="text-lg font-bold text-zinc-900 mt-1 mb-2">Catálogo & Loja Digital</h3>
+            <p class="text-zinc-600 text-sm leading-relaxed mb-6">
+              Montra de produtos com filtragem dinâmica instantânea e navegação otimizada para compras rápidas através de smartphone.
+            </p>
+          </div>
+          <div>
+            <div class="flex flex-wrap gap-1.5 mb-5">
+              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">Next.js</span>
+              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">Framer Motion</span>
+              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">Tailwind CSS</span>
+            </div>
+            <div class="flex items-center gap-4 pt-4 border-t border-zinc-100 text-xs font-semibold">
+              <a href="https://github.com/Lapeira" target="_blank" rel="noreferrer" class="inline-flex items-center gap-1.5 text-zinc-900 hover:underline">
+                Repositório GitHub 
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Projeto 2: Painel de Métricas & Dashboard -->
+        <article class="flex flex-col justify-between bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Métricas / Dados</span>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700">Concluído</span>
+            </div>
+            <h3 class="text-lg font-bold text-zinc-900 mt-1 mb-2">Painel de Métricas & Dashboard</h3>
+            <p class="text-zinc-600 text-sm leading-relaxed mb-6">
+              Visualização de indicadores de desempenho, medidores interativos e gráficos limpos para decisões estratégicas.
+            </p>
+          </div>
+          <div>
+            <div class="flex flex-wrap gap-1.5 mb-5">
+              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">JavaScript</span>
+              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">SVG Canvas</span>
+              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">CSS Grid</span>
+            </div>
+            <div class="flex items-center gap-4 pt-4 border-t border-zinc-100 text-xs font-semibold">
+              <a href="https://github.com/Lapeira" target="_blank" rel="noreferrer" class="inline-flex items-center gap-1.5 text-zinc-900 hover:underline">
+                Repositório GitHub 
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Projeto 3: Projetos Personalizados / À Medida -->
+        <article class="flex flex-col justify-between bg-zinc-900 text-white rounded-2xl p-6 border border-zinc-800 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wide">Sob Medida</span>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300">Personalizado</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mt-1 mb-2">Projetos Personalizados</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-6">
+              Soluções à medida para clubes desportivos, plataformas internas ou ideias exclusivas desenvolvidas do conceito ao lançamento.
+            </p>
+          </div>
+          <div>
+            <div class="flex flex-wrap gap-1.5 mb-5">
+              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-800 text-zinc-300 font-medium">Custom UI</span>
+              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-800 text-zinc-300 font-medium">Full Frontend</span>
+              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-800 text-zinc-300 font-medium">TypeScript</span>
+            </div>
+            <div class="flex items-center gap-4 pt-4 border-t border-zinc-800 text-xs font-semibold">
+              <a href="#contacto" class="inline-flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 hover:underline">
+                Pedir Proposta <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </a>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 4. CONTACTO COM FORMULÁRIO DE ORÇAMENTO COMPLETO         -->
+  <!-- ======================================================== -->
+  <section id="contacto" class="py-20 px-6 md:px-14 bg-white border-t border-zinc-200">
+    <div class="max-w-2xl mx-auto">
+      
+      <div class="text-center mb-10">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-xs font-semibold mb-3">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Resposta habitual em menos de 24h
+        </span>
+        <h2 class="text-3xl font-extrabold text-zinc-950 mt-1 mb-2">Vamos falar sobre o seu projeto?</h2>
+        <p class="text-zinc-600 text-sm">
+          Partilhe a sua ideia para receber uma estimativa rápida de prazos e investimento.
+        </p>
+      </div>
+
+      <!-- Formulário com envio para e-mail -->
+      <form action="https://api.web3forms.com/submit" method="POST" class="space-y-5 bg-zinc-50/50 p-6 sm:p-8 rounded-3xl border border-zinc-200">
+        <input type="hidden" name="access_key" value="SUA_CHAVE_WEB3FORMS" />
+        <input type="hidden" name="subject" value="Novo Pedido de Orçamento - AL Dev Studios" />
+        <input type="checkbox" name="botcheck" class="hidden" style="display: none;" />
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">O seu nome *</label>
+            <input type="text" name="nome" required placeholder="Ex: Rui Ferreira" class="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">O seu e-mail *</label>
+            <input type="email" name="email" required placeholder="rui@empresa.pt" class="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all" />
+          </div>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">WhatsApp / Telefone</label>
+            <input type="tel" name="telefone" placeholder="+351 912 345 678" class="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">Orçamento Previsto</label>
+            <select name="orcamento" class="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all">
+              <option value="A avaliar">A definir / Gostaria de sugestão</option>
+              <option value="Até 300€">Até 300 € (Website simples ou Ajustes)</option>
+              <option value="300€ - 700€">300 € – 700 € (Website completo, Loja ou Dashboard)</option>
+              <option value="Mais de 700€">Mais de 700 € (Plataforma personalizada à medida)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">Que tipo de solução procura?</label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <label class="flex flex-col p-3 rounded-xl border border-zinc-200 bg-white cursor-pointer hover:border-zinc-900 transition-all has-[:checked]:border-zinc-900 has-[:checked]:bg-zinc-900 has-[:checked]:text-white group">
+              <input type="radio" name="tipo_projeto" value="Website / Loja Online" class="sr-only" checked />
+              <span class="text-xs font-bold mb-0.5">Website / Loja</span>
+              <span class="text-[11px] text-zinc-500 group-has-[:checked]:text-zinc-300">Páginas de apresentação e e-commerce</span>
+            </label>
+            <label class="flex flex-col p-3 rounded-xl border border-zinc-200 bg-white cursor-pointer hover:border-zinc-900 transition-all has-[:checked]:border-zinc-900 has-[:checked]:bg-zinc-900 has-[:checked]:text-white group">
+              <input type="radio" name="tipo_projeto" value="Dashboard / Métricas / Gestão" class="sr-only" />
+              <span class="text-xs font-bold mb-0.5">Dashboards & Métricas</span>
+              <span class="text-[11px] text-zinc-500 group-has-[:checked]:text-zinc-300">Medidores, empresas e clubes</span>
+            </label>
+            <label class="flex flex-col p-3 rounded-xl border border-zinc-200 bg-white cursor-pointer hover:border-zinc-900 transition-all has-[:checked]:border-zinc-900 has-[:checked]:bg-zinc-900 has-[:checked]:text-white group">
+              <input type="radio" name="tipo_projeto" value="Projeto Personalizado / À Medida" class="sr-only" />
+              <span class="text-xs font-bold mb-0.5">Projeto Personalizado</span>
+              <span class="text-[11px] text-zinc-500 group-has-[:checked]:text-zinc-300">Solução exclusiva à medida</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">Mensagem / Resumo do Pedido *</label>
+          <textarea name="mensagem" rows="4" required placeholder="Descreva brevemente o seu projeto, clube ou empresa e o que pretende alcançar..." class="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all resize-none"></textarea>
+        </div>
+
+        <button type="submit" class="w-full py-4 rounded-xl bg-zinc-950 text-white font-bold text-sm hover:bg-zinc-800 transition-all shadow-lg active:scale-[0.99] flex items-center justify-center gap-2">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          Pedir Proposta Sem Compromisso
+        </button>
+      </form>
+
+      <!-- Contactos Diretos de Rodapé -->
+      <div class="mt-8 flex flex-wrap justify-center items-center gap-6 text-xs text-zinc-600">
+        <a href="mailto:alexandre.lapeiras@gmail.com" class="inline-flex items-center gap-1.5 hover:text-zinc-950 font-medium">
+          <i data-lucide="mail" class="w-3.5 h-3.5 text-zinc-500"></i>
+          alexandre.lapeiras@gmail.com
+        </a>
+        <a href="https://wa.me/351965180804" target="_blank" rel="noreferrer" class="inline-flex items-center gap-1.5 hover:text-zinc-950 font-medium">
+          <svg class="w-3.5 h-3.5 fill-[#25D366]" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+          +351 965 180 804
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 5. RODAPÉ                                                -->
+  <!-- ======================================================== -->
+  <footer class="py-8 text-center text-xs text-zinc-500 border-t border-zinc-200 bg-zinc-50 pb-24">
+    <p>© 2026 AL Dev Studios — Alexandre Sousa. Websites, Dashboards de Métricas & Projetos Personalizados.</p>
+  </footer>
+
+  <!-- ======================================================== -->
+  <!-- 6. BARRA FLUTUANTE (DOCK NAVIGATION)                     -->
+  <!-- ======================================================== -->
+  <div class="fixed bottom-6 inset-x-0 z-50 flex justify-center pointer-events-none px-4">
+    <nav class="pointer-events-auto flex items-center gap-1.5 p-2 rounded-full bg-white/80 backdrop-blur-xl border border-zinc-200/90 shadow-xl shadow-zinc-900/5">
+      <a href="#inicio" aria-label="Início" class="p-2.5 rounded-full text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
+        <i data-lucide="home" class="w-4 h-4"></i>
+      </a>
+      <a href="#servicos" aria-label="Serviços" class="p-2.5 rounded-full text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
+        <i data-lucide="briefcase" class="w-4 h-4"></i>
+      </a>
+      <a href="#projetos" aria-label="Projetos" class="p-2.5 rounded-full text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
+        <i data-lucide="folder-git-2" class="w-4 h-4"></i>
+      </a>
+      <a href="#contacto" aria-label="Contacto" class="p-2.5 rounded-full text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
+        <i data-lucide="mail" class="w-4 h-4"></i>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Inicialização dos Ícones e Rastreio do Rato -->
+  <script>
+    lucide.createIcons();
+
+    const heroSection = document.getElementById('inicio');
+    const root = document.documentElement;
+
+    function updateSpotlight(x, y) {
+      root.style.setProperty('--mouse-x', `${x}px`);
+      root.style.setProperty('--mouse-y', `${y}px`);
+      root.style.setProperty('--reveal-opacity', '1');
+    }
+
+    if (heroSection) {
+      heroSection.addEventListener('mousemove', (e) => {
+        const rect = heroSection.getBoundingClientRect();
+        updateSpotlight(e.clientX - rect.left, e.clientY - rect.top);
+      });
+
+      heroSection.addEventListener('touchmove', (e) => {
+        if (e.touches.length > 0) {
+          const rect = heroSection.getBoundingClientRect();
+          updateSpotlight(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+        }
+      }, { passive: true });
+
+      heroSection.addEventListener('mouseleave', () => {
+        root.style.setProperty('--reveal-opacity', '0');
+      });
+    }
+  </script>
+</body>
+</html>
