@@ -3,8 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AL Dev Studios | Alexandre Sousa - Frontend Developer & Web Solutions</title>
-  <meta name="description" content="AL Dev Studios por Alexandre Sousa. Criação de websites modernos, lojas online, dashboards de métricas, plataformas para clubes desportivos e projetos personalizados." />
+  <title>Alexandre Sousa | Programador Full-Stack Júnior</title>
+  <meta name="description" content="Alexandre Sousa, Programador Full-Stack Júnior (Node.js, Express, MySQL, Python). CTeSP em Tecnologias e Programação de Sistemas de Informação e estágio na Cruz Vermelha Portuguesa." />
+  <meta name="theme-color" content="#18181b" />
+  <link rel="canonical" href="https://lapeira.github.io/al-dev-studios/" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2318181b'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial,sans-serif' font-weight='900' font-size='28' fill='%2334d399'%3EAS%3C/text%3E%3C/svg%3E" />
+
+  <!-- Pré-visualização ao partilhar (WhatsApp, LinkedIn, etc.) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="pt_PT" />
+  <meta property="og:site_name" content="Alexandre Sousa" />
+  <meta property="og:title" content="Alexandre Sousa | Programador Full-Stack Júnior" />
+  <meta property="og:description" content="Node.js, Express, MySQL e Python. Estágio na Cruz Vermelha Portuguesa a desenvolver uma plataforma de gestão interna." />
+  <meta property="og:url" content="https://lapeira.github.io/al-dev-studios/" />
+  <meta property="og:image" content="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&h=630&q=80" />
+  <meta name="twitter:card" content="summary_large_image" />
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -15,7 +30,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
 
   <!-- Ícones Lucide -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@1.59.0/dist/umd/lucide.min.js"></script>
 
   <style>
     body {
@@ -50,94 +65,124 @@
       opacity: var(--reveal-opacity, 0);
       transition: opacity 0.25s ease-out;
     }
+
+    /* Miniatura ao vivo das demos (página renderizada a 25%) */
+    .preview-frame {
+      position: relative;
+      height: 11rem;
+      overflow: hidden;
+      background: #f4f4f5;
+      border-bottom: 1px solid #f4f4f5;
+    }
+    .preview-frame iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 400%;
+      height: 400%;
+      border: 0;
+      transform: scale(0.25);
+      transform-origin: top left;
+      pointer-events: none;
+    }
+
+    /* Respeitar quem prefere menos animação */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
   </style>
 </head>
 <body class="bg-[#fafafa] text-zinc-900 selection:bg-zinc-900 selection:text-white">
 
   <!-- ======================================================== -->
-  <!-- 1. HERO SECTION (INTERATIVO COM SPOTLIGHT)               -->
+  <!-- 1. HERO                                                  -->
   <!-- ======================================================== -->
   <section id="inicio" class="relative min-h-[92vh] flex flex-col justify-between overflow-hidden bg-white border-b border-zinc-200/80">
     <!-- Camada Esboço / Preto e Branco -->
     <div class="absolute inset-0 pointer-events-none z-0">
-      <img 
-        src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=2000&q=80" 
-        alt="Fundo Esboço" 
+      <img
+        src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=2000&q=80"
+        alt="" aria-hidden="true"
         class="w-full h-full object-cover filter grayscale contrast-125 opacity-70"
       />
     </div>
 
     <!-- Camada a Cores Revelada pelo Cursor -->
     <div class="absolute inset-0 pointer-events-none z-0 reveal-layer">
-      <img 
-        src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=2000&q=80" 
-        alt="Fundo Colorido" 
+      <img
+        src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=2000&q=80"
+        alt="" aria-hidden="true"
         class="w-full h-full object-cover"
       />
     </div>
 
-    <!-- Conteúdo da Hero -->
+    <!-- Gradiente para o texto se ler bem por cima da imagem -->
+    <div class="absolute inset-0 pointer-events-none z-0 bg-gradient-to-b md:bg-gradient-to-r from-white/90 via-white/60 to-transparent"></div>
+
     <header class="relative z-10 p-6 md:p-14 max-w-2xl">
-      <div class="flex items-center gap-3 mb-6">
+      <div class="flex flex-wrap items-center gap-3 mb-6">
         <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 text-white text-xs font-bold tracking-wider uppercase">
           <i data-lucide="code-2" class="w-3.5 h-3.5 text-emerald-400"></i>
-          AL Dev Studios
+          Alexandre Sousa
         </div>
         <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-xs font-semibold">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          Disponível para novos projetos
+          Disponível para começar já
         </div>
       </div>
 
       <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-zinc-950 mb-4 leading-tight">
-        Frontend Developer & Web Solutions
+        Programador Full-Stack <span class="font-serif-italic font-semibold">Júnior</span>
       </h1>
 
-      <p class="text-zinc-700 text-base sm:text-lg leading-relaxed mb-8">
-        Olá, sou o <span class="font-serif-italic font-semibold underline underline-offset-4 decoration-zinc-400">Alexandre Sousa</span>. Desenvolvo websites modernos, lojas online, painéis de métricas e soluções sob medida para empresas e clubes desportivos com foco em usabilidade, velocidade e impacto visual.
+      <p class="text-zinc-700 text-base sm:text-lg leading-relaxed mb-4">
+        Olá, sou o Alexandre. Tenho o CTeSP em Tecnologias e Programação de Sistemas de Informação e, no estágio na
+        <strong class="text-zinc-900">Cruz Vermelha Portuguesa</strong>, desenvolvi de raiz uma plataforma de gestão interna com Node.js, Express e MySQL.
+        Procuro a minha primeira oportunidade como programador júnior.
       </p>
 
-      <!-- Botões de Ação com Redes Reais e SVGs Nativos -->
+      <ul class="flex flex-wrap gap-1.5 mb-8" aria-label="Principais tecnologias">
+        <li class="text-xs px-2.5 py-1 rounded-md bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-800 font-semibold">Node.js</li>
+        <li class="text-xs px-2.5 py-1 rounded-md bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-800 font-semibold">Express</li>
+        <li class="text-xs px-2.5 py-1 rounded-md bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-800 font-semibold">MySQL</li>
+        <li class="text-xs px-2.5 py-1 rounded-md bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-800 font-semibold">JavaScript</li>
+        <li class="text-xs px-2.5 py-1 rounded-md bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-800 font-semibold">Python</li>
+      </ul>
+
       <div class="flex flex-wrap items-center gap-3">
-        <a href="#contacto" class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-800 transition-all shadow-sm active:scale-95">
-          Pedir Orçamento Gratuito
+        <!-- Coloca o PDF do CV na pasta do portfolio com este nome exato -->
+        <a href="./Alexandre-Sousa-CV-Programador.pdf" download class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-800 transition-all shadow-sm active:scale-95">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          Descarregar CV
         </a>
-        
-        <!-- WhatsApp Oficial -->
-        <a 
-          href="https://wa.me/351965180804?text=Ol%C3%A1%20Alexandre,%20gostaria%20de%20falar%20sobre%20um%20projeto%20com%20a%20AL%20Dev%20Studios." 
-          target="_blank" 
-          rel="noreferrer"
-          class="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#25D366] text-white text-sm font-semibold hover:bg-[#20bd5a] transition-all shadow-sm active:scale-95"
-        >
-          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
-            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
-          </svg>
-          WhatsApp
+        <a href="#projetos" class="inline-flex items-center justify-center px-5 py-3 rounded-full bg-white/95 backdrop-blur-sm border border-zinc-200 text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition-all shadow-sm active:scale-95">
+          Ver projetos
         </a>
 
-        <!-- GitHub Oficial -->
-        <a 
-          href="https://github.com/Lapeira" 
-          target="_blank" 
-          rel="noreferrer" 
-          aria-label="GitHub de Alexandre Sousa" 
+        <a
+          href="https://github.com/Lapeira"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="GitHub de Alexandre Sousa"
           class="w-11 h-11 rounded-full border border-zinc-200 bg-white/95 backdrop-blur-sm flex items-center justify-center text-zinc-800 hover:bg-zinc-100 hover:text-black hover:scale-105 transition-all shadow-sm"
         >
-          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
           </svg>
         </a>
 
-        <!-- LinkedIn Oficial -->
-        <a 
-          href="https://www.linkedin.com/in/alexandre-sousa-a750042ab" 
-          target="_blank" 
-          rel="noreferrer" 
-          aria-label="LinkedIn de Alexandre Sousa" 
+        <a
+          href="https://www.linkedin.com/in/alexandre-sousa-a750042ab"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="LinkedIn de Alexandre Sousa"
           class="w-11 h-11 rounded-full border border-zinc-200 bg-white/95 backdrop-blur-sm flex items-center justify-center text-[#0A66C2] hover:bg-zinc-100 hover:scale-105 transition-all shadow-sm"
         >
-          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
           </svg>
         </a>
@@ -145,273 +190,388 @@
     </header>
 
     <div class="relative z-10 flex justify-center pb-6 text-zinc-400 animate-bounce">
-      <a href="#servicos" aria-label="Descer para serviços">
+      <a href="#projetos" aria-label="Descer para projetos">
         <i data-lucide="chevron-down" class="w-5 h-5"></i>
       </a>
     </div>
   </section>
 
   <!-- ======================================================== -->
-  <!-- 2. SERVIÇOS DA AL DEV STUDIOS                            -->
+  <!-- 2. PROJETOS                                              -->
   <!-- ======================================================== -->
-  <section id="servicos" class="py-20 px-6 md:px-14 max-w-6xl mx-auto">
-    <div class="text-center max-w-2xl mx-auto mb-14">
-      <span class="text-xs font-bold text-zinc-500 tracking-wider uppercase">Soluções Digitais</span>
-      <h2 class="text-2xl sm:text-4xl font-extrabold text-zinc-950 mt-2 mb-3">O que construo para o seu negócio</h2>
-      <p class="text-zinc-600 text-sm sm:text-base">
-        Aplicações e websites modernos desenvolvidos para carregamento rápido, controlo intuitivo e impacto visual.
+  <section id="projetos" class="py-20 px-6 md:px-14 max-w-6xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+      <div>
+        <span class="text-xs font-bold text-zinc-500 tracking-wider uppercase">Trabalho</span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-zinc-950 mt-1">Projetos</h2>
+      </div>
+      <p class="text-sm text-zinc-500 max-w-sm mt-2 md:mt-0">
+        Do estágio aos projetos pessoais: o problema, o que construí e com que tecnologias.
       </p>
     </div>
 
+    <!-- Projeto principal: Cruz Vermelha -->
+    <article class="bg-white rounded-3xl border border-zinc-200/80 shadow-sm overflow-hidden mb-6">
+      <div class="grid lg:grid-cols-5">
+
+        <div class="lg:col-span-3 p-6 sm:p-10">
+          <div class="flex flex-wrap items-center gap-2 mb-4">
+            <span class="text-[11px] font-bold text-red-600 uppercase tracking-wide">Estágio · fev. – jun. 2025</span>
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60">Classificação: 15 valores</span>
+          </div>
+          <h3 class="text-xl sm:text-2xl font-extrabold text-zinc-950 mb-3">Plataforma de Gestão Interna — Cruz Vermelha Portuguesa</h3>
+          <p class="text-zinc-600 text-sm sm:text-base leading-relaxed mb-6">
+            A delegação de Gandarela precisava de um sistema para gerir clientes, marcações e as horas dos funcionários.
+            Desenvolvi a plataforma de raiz, do modelo da base de dados à interface.
+          </p>
+
+          <ul class="space-y-3 text-sm text-zinc-700 mb-6">
+            <li class="flex gap-3"><i data-lucide="database" class="w-4 h-4 mt-0.5 shrink-0 text-zinc-400"></i><span>Base de dados relacional em <strong>MySQL</strong> para clientes, marcações e registo de horas.</span></li>
+            <li class="flex gap-3"><i data-lucide="server" class="w-4 h-4 mt-0.5 shrink-0 text-zinc-400"></i><span><strong>API REST</strong> em Node.js e Express.js.</span></li>
+            <li class="flex gap-3"><i data-lucide="shield-check" class="w-4 h-4 mt-0.5 shrink-0 text-zinc-400"></i><span>Autenticação com <strong>JWT</strong>, palavras-passe cifradas com <strong>bcrypt</strong> e perfis Administrador/Staff controlados por middleware.</span></li>
+            <li class="flex gap-3"><i data-lucide="calendar-days" class="w-4 h-4 mt-0.5 shrink-0 text-zinc-400"></i><span>Calendário interativo com <strong>FullCalendar</strong> para as marcações diárias.</span></li>
+          </ul>
+
+          <div class="flex flex-wrap gap-1.5 mb-6">
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">Node.js</span>
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">Express.js</span>
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">MySQL</span>
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">JWT</span>
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">bcrypt</span>
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">FullCalendar</span>
+          </div>
+
+          <a href="https://github.com/Lapeira/gestao-cruz-vermelha" target="_blank" rel="noreferrer" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-800 transition-all">
+            Ver código no GitHub <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+          </a>
+        </div>
+
+        <!-- Arquitetura da plataforma (troca por capturas de ecrã quando as tiveres) -->
+        <div class="lg:col-span-2 bg-zinc-950 text-white p-6 sm:p-10 flex flex-col justify-center">
+          <span class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-5">Arquitetura</span>
+          <ol class="space-y-2" aria-label="Arquitetura da plataforma">
+            <li class="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+              <p class="text-sm font-bold">Interface web</p>
+              <p class="text-xs text-zinc-400 mt-0.5">JavaScript, CSS, FullCalendar</p>
+            </li>
+            <li class="flex justify-center text-zinc-600" aria-hidden="true"><i data-lucide="arrow-down" class="w-4 h-4"></i></li>
+            <li class="rounded-xl border border-emerald-500/40 bg-zinc-900 p-4">
+              <p class="text-sm font-bold">API REST · Node.js + Express</p>
+              <p class="text-xs text-zinc-400 mt-0.5">Login com JWT → middleware verifica o perfil (Administrador ou Staff)</p>
+            </li>
+            <li class="flex justify-center text-zinc-600" aria-hidden="true"><i data-lucide="arrow-down" class="w-4 h-4"></i></li>
+            <li class="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+              <p class="text-sm font-bold">MySQL</p>
+              <p class="text-xs text-zinc-400 mt-0.5">Clientes · Marcações · Horas dos funcionários</p>
+            </li>
+          </ol>
+        </div>
+
+      </div>
+    </article>
+
     <div class="grid md:grid-cols-3 gap-6">
-      
-      <!-- Serviço 1: Websites & Lojas Online -->
-      <div class="p-8 rounded-2xl bg-white border border-zinc-200/80 shadow-sm hover:shadow-md transition-all">
-        <div class="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-900 mb-6">
-          <i data-lucide="shopping-bag" class="w-6 h-6"></i>
-        </div>
-        <h3 class="text-lg font-bold text-zinc-900 mb-2">Websites & Lojas Online</h3>
-        <p class="text-zinc-600 text-sm leading-relaxed mb-4">
-          Páginas institucionais, montras de produtos e lojas digitais com navegação rápida, preparadas para destacar a sua marca no mercado.
-        </p>
-        <ul class="text-xs text-zinc-500 space-y-2 border-t border-zinc-100 pt-4">
-          <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Catálogos e filtros em tempo real</li>
-          <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Otimização para telemóveis e SEO</li>
-        </ul>
-      </div>
 
-      <!-- Serviço 2: Dashboards de Métricas & Gestão -->
-      <div class="p-8 rounded-2xl bg-white border border-zinc-200/80 shadow-sm hover:shadow-md transition-all">
-        <div class="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-900 mb-6">
-          <i data-lucide="line-chart" class="w-6 h-6"></i>
-        </div>
-        <h3 class="text-lg font-bold text-zinc-900 mb-2">Dashboards, Métricas & Gestão</h3>
-        <p class="text-zinc-600 text-sm leading-relaxed mb-4">
-          Painéis visuais com medidores de métricas, gráficos e indicadores de desempenho para empresas e controlo de atletas em clubes desportivos.
-        </p>
-        <ul class="text-xs text-zinc-500 space-y-2 border-t border-zinc-100 pt-4">
-          <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Medidores e gráficos dinâmicos</li>
-          <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Organização clara de dados e equipas</li>
-        </ul>
-      </div>
-
-      <!-- Serviço 3: Modernização & Performance -->
-      <div class="p-8 rounded-2xl bg-white border border-zinc-200/80 shadow-sm hover:shadow-md transition-all">
-        <div class="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-900 mb-6">
-          <i data-lucide="zap" class="w-6 h-6"></i>
-        </div>
-        <h3 class="text-lg font-bold text-zinc-900 mb-2">Modernização de Interfaces</h3>
-        <p class="text-zinc-600 text-sm leading-relaxed mb-4">
-          Renovação visual de sistemas ou websites obsoletos, tornando-os ultrarrápidos e intuitivos com tecnologias modernas como React e Tailwind.
-        </p>
-        <ul class="text-xs text-zinc-500 space-y-2 border-t border-zinc-100 pt-4">
-          <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Carregamento instantâneo</li>
-          <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> Código modular e escalável</li>
-        </ul>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ======================================================== -->
-  <!-- 3. PROJETOS EM DESTAQUE (COM LINKS DIRETOS PARA PASTAS)  -->
-  <!-- ======================================================== -->
-  <section id="projetos" class="py-20 px-6 md:px-14 bg-zinc-100/60 border-t border-b border-zinc-200">
-    <div class="max-w-6xl mx-auto">
-      <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+      <!-- Sistema de Gestão de Atletas (em desenvolvimento) -->
+      <article class="flex flex-col justify-between bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-sm">
         <div>
-          <span class="text-xs font-bold text-zinc-500 tracking-wider uppercase">Casos Práticos & Soluções</span>
-          <h2 class="text-2xl sm:text-4xl font-extrabold text-zinc-950 mt-1">Interfaces & Projetos</h2>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Desktop / Full-Stack</span>
+            <span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200/60">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Em desenvolvimento
+            </span>
+          </div>
+          <h3 class="text-lg font-bold text-zinc-900 mt-1 mb-2">Sistema de Gestão de Atletas</h3>
+          <p class="text-zinc-600 text-sm leading-relaxed mb-4">
+            Aplicação para clubes desportivos: registo de atletas, escalão calculado automaticamente pela idade e controlo das mensalidades.
+            Começou como aplicação web em Flask e foi convertida em aplicação desktop com pywebview.
+          </p>
         </div>
-        <p class="text-sm text-zinc-500 max-w-sm mt-2 md:mt-0">
-          Aplicações e soluções construídas para resolver desafios reais de negócio e métricas.
-        </p>
+        <div>
+          <div class="flex flex-wrap gap-1.5 mb-5">
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">Python</span>
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">Flask</span>
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">SQLite</span>
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">pywebview</span>
+          </div>
+          <p class="pt-4 border-t border-zinc-100 text-xs font-semibold text-zinc-500">
+            Código e capturas de ecrã em breve
+          </p>
+        </div>
+      </article>
+
+      <!-- Demo: Catálogo & Loja Digital -->
+      <article class="flex flex-col justify-between bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+        <div>
+          <a href="./Loja/index.html" aria-label="Abrir demonstração do Catálogo & Loja Digital" class="preview-frame block -mx-6 -mt-6 mb-5 rounded-t-2xl">
+            <iframe src="./Loja/index.html" title="Pré-visualização do Catálogo & Loja Digital" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
+          </a>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Front-end</span>
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700">Projeto pessoal</span>
+          </div>
+          <h3 class="text-lg font-bold text-zinc-900 mt-1 mb-2">Catálogo & Loja Digital</h3>
+          <p class="text-zinc-600 text-sm leading-relaxed mb-6">
+            Catálogo com pesquisa e filtros por categoria em tempo real, renderizado a partir de dados em JavaScript, com encomenda por WhatsApp.
+          </p>
+        </div>
+        <div>
+          <div class="flex flex-wrap gap-1.5 mb-5">
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">JavaScript</span>
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">Tailwind CSS</span>
+          </div>
+          <div class="flex items-center gap-4 pt-4 border-t border-zinc-100 text-xs font-semibold">
+            <a href="./Loja/index.html" class="inline-flex items-center gap-1.5 text-zinc-950 hover:underline">
+              Ver demo <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
+            <a href="https://github.com/Lapeira/al-dev-studios/tree/main/Loja" target="_blank" rel="noreferrer" class="inline-flex items-center gap-1.5 text-zinc-500 hover:text-zinc-900">
+              Código <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Demo: Painel de Métricas -->
+      <article class="flex flex-col justify-between bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+        <div>
+          <a href="./Metricas/index.html" aria-label="Abrir demonstração do Painel de Métricas" class="preview-frame block -mx-6 -mt-6 mb-5 rounded-t-2xl">
+            <iframe src="./Metricas/index.html" title="Pré-visualização do Painel de Métricas" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
+          </a>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Front-end / Dados</span>
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700">Projeto pessoal</span>
+          </div>
+          <h3 class="text-lg font-bold text-zinc-900 mt-1 mb-2">Painel de Métricas Desportivas</h3>
+          <p class="text-zinc-600 text-sm leading-relaxed mb-6">
+            Dashboard de um clube com indicadores, gráfico de pontos por mês e tabela de atletas com pesquisa.
+          </p>
+        </div>
+        <div>
+          <div class="flex flex-wrap gap-1.5 mb-5">
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">JavaScript</span>
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">Tailwind CSS</span>
+          </div>
+          <div class="flex items-center gap-4 pt-4 border-t border-zinc-100 text-xs font-semibold">
+            <a href="./Metricas/index.html" class="inline-flex items-center gap-1.5 text-zinc-950 hover:underline">
+              Ver demo <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
+            <a href="https://github.com/Lapeira/al-dev-studios/tree/main/Metricas" target="_blank" rel="noreferrer" class="inline-flex items-center gap-1.5 text-zinc-500 hover:text-zinc-900">
+              Código <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 3. COMPETÊNCIAS                                          -->
+  <!-- ======================================================== -->
+  <section id="competencias" class="py-20 px-6 md:px-14 bg-zinc-100/60 border-t border-b border-zinc-200">
+    <div class="max-w-6xl mx-auto">
+      <div class="max-w-2xl mb-12">
+        <span class="text-xs font-bold text-zinc-500 tracking-wider uppercase">Competências</span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-zinc-950 mt-2">Com que tecnologias trabalho</h2>
       </div>
 
-      <div class="grid md:grid-cols-3 gap-6">
-
-        <!-- Projeto 1: Catálogo & Loja Digital (Link: ./catalogo/index.html) -->
-        <article class="flex flex-col justify-between bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
-          <div>
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">E-commerce / Lojas</span>
-              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700">Concluído</span>
-            </div>
-            <h3 class="text-lg font-bold text-zinc-900 mt-1 mb-2">Catálogo & Loja Digital</h3>
-            <p class="text-zinc-600 text-sm leading-relaxed mb-6">
-              Montra de produtos com filtragem dinâmica instantânea e encomendas rápidas via WhatsApp otimizada para smartphones.
-            </p>
-          </div>
-          <div>
-            <div class="flex flex-wrap gap-1.5 mb-5">
-              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">JavaScript</span>
-              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">Tailwind CSS</span>
-              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">Filtros Dinâmicos</span>
-            </div>
-            <div class="flex items-center gap-4 pt-4 border-t border-zinc-100 text-xs font-semibold">
-              <!-- LINK DIRETO PARA A PASTA DO CATÁLOGO -->
-              <a href="./Loja/index.html" class="inline-flex items-center gap-1.5 text-zinc-950 hover:underline">
-                Ver Demonstração <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-              </a>
-              <a href="https://github.com/Lapeira" target="_blank" rel="noreferrer" class="inline-flex items-center gap-1.5 text-zinc-500 hover:text-zinc-900">
-                GitHub 
-                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-              </a>
-            </div>
-          </div>
-        </article>
-
-        <!-- Projeto 2: Painel de Métricas & Dashboard (Link: ./metricas/index.html) -->
-        <article class="flex flex-col justify-between bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
-          <div>
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Métricas / Dados</span>
-              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700">Concluído</span>
-            </div>
-            <h3 class="text-lg font-bold text-zinc-900 mt-1 mb-2">Painel de Métricas & Dashboard</h3>
-            <p class="text-zinc-600 text-sm leading-relaxed mb-6">
-              Visualização de indicadores de desempenho, medidores interativos e gráficos limpos para decisões estratégicas em clubes ou empresas.
-            </p>
-          </div>
-          <div>
-            <div class="flex flex-wrap gap-1.5 mb-5">
-              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">JavaScript</span>
-              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">Gráficos Flex</span>
-              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">Tabela Dinâmica</span>
-            </div>
-            <div class="flex items-center gap-4 pt-4 border-t border-zinc-100 text-xs font-semibold">
-              <!-- LINK DIRETO PARA A PASTA DE MÉTRICAS -->
-              <a href="./Metricas/index.html" class="inline-flex items-center gap-1.5 text-zinc-950 hover:underline">
-                Ver Demonstração <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-              </a>
-              <a href="https://github.com/Lapeira" target="_blank" rel="noreferrer" class="inline-flex items-center gap-1.5 text-zinc-500 hover:text-zinc-900">
-                GitHub 
-                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-              </a>
-            </div>
-          </div>
-        </article>
-
-        <!-- Projeto 3: Projetos Personalizados / À Medida -->
-        <article class="flex flex-col justify-between bg-zinc-900 text-white rounded-2xl p-6 border border-zinc-800 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
-          <div>
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wide">Sob Medida</span>
-              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300">Personalizado</span>
-            </div>
-            <h3 class="text-lg font-bold text-white mt-1 mb-2">Projetos Personalizados</h3>
-            <p class="text-zinc-400 text-sm leading-relaxed mb-6">
-              Soluções à medida para clubes desportivos, plataformas internas ou ideias exclusivas desenvolvidas do conceito ao lançamento.
-            </p>
-          </div>
-          <div>
-            <div class="flex flex-wrap gap-1.5 mb-5">
-              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-800 text-zinc-300 font-medium">Custom UI</span>
-              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-800 text-zinc-300 font-medium">Full Frontend</span>
-              <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-800 text-zinc-300 font-medium">Tailwind CSS</span>
-            </div>
-            <div class="flex items-center gap-4 pt-4 border-t border-zinc-800 text-xs font-semibold">
-              <a href="#contacto" class="inline-flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 hover:underline">
-                Pedir Proposta <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-              </a>
-            </div>
-          </div>
-        </article>
-
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-6 rounded-2xl bg-white border border-zinc-200/80 shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-900 mb-4"><i data-lucide="server" class="w-5 h-5"></i></div>
+          <h3 class="font-bold text-zinc-900 mb-3">Back-end</h3>
+          <ul class="text-sm text-zinc-600 space-y-1.5">
+            <li>Node.js e Express.js</li>
+            <li>Python e Flask</li>
+            <li>APIs REST</li>
+            <li>Autenticação JWT e bcrypt</li>
+          </ul>
+        </div>
+        <div class="p-6 rounded-2xl bg-white border border-zinc-200/80 shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-900 mb-4"><i data-lucide="layout-template" class="w-5 h-5"></i></div>
+          <h3 class="font-bold text-zinc-900 mb-3">Front-end</h3>
+          <ul class="text-sm text-zinc-600 space-y-1.5">
+            <li>JavaScript</li>
+            <li>HTML5 e CSS3</li>
+            <li>Tailwind CSS</li>
+            <li>Design responsivo</li>
+          </ul>
+        </div>
+        <div class="p-6 rounded-2xl bg-white border border-zinc-200/80 shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-900 mb-4"><i data-lucide="database" class="w-5 h-5"></i></div>
+          <h3 class="font-bold text-zinc-900 mb-3">Bases de dados</h3>
+          <ul class="text-sm text-zinc-600 space-y-1.5">
+            <li>MySQL</li>
+            <li>SQLite</li>
+            <li>SQL</li>
+            <li>Modelação relacional</li>
+          </ul>
+        </div>
+        <div class="p-6 rounded-2xl bg-white border border-zinc-200/80 shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-900 mb-4"><i data-lucide="wrench" class="w-5 h-5"></i></div>
+          <h3 class="font-bold text-zinc-900 mb-3">Ferramentas</h3>
+          <ul class="text-sm text-zinc-600 space-y-1.5">
+            <li>Git e GitHub</li>
+            <li>Linux</li>
+            <li>pywebview (apps desktop)</li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- ======================================================== -->
-  <!-- 4. CONTACTO COM FORMULÁRIO DE ORÇAMENTO COMPLETO         -->
+  <!-- 4. SOBRE MIM                                             -->
+  <!-- ======================================================== -->
+  <section id="sobre" class="py-20 px-6 md:px-14 max-w-6xl mx-auto">
+    <div class="grid lg:grid-cols-5 gap-10 lg:gap-14 items-start">
+
+      <!-- Cartão de perfil -->
+      <aside class="lg:col-span-2 bg-white rounded-3xl border border-zinc-200/80 shadow-sm p-8 lg:sticky lg:top-8">
+        <!-- Para usar uma foto: troca este bloco por
+             <img src="./foto.jpg" alt="Alexandre Sousa" class="w-24 h-24 rounded-2xl object-cover mb-6" /> -->
+        <div class="w-24 h-24 rounded-2xl bg-zinc-900 text-white flex items-center justify-center text-3xl font-black tracking-tight mb-6" aria-hidden="true">
+          AS
+        </div>
+        <h3 class="text-xl font-extrabold text-zinc-950">Alexandre Sousa</h3>
+        <p class="text-sm text-zinc-500 mb-6">Programador Full-Stack Júnior</p>
+
+        <dl class="space-y-3 text-sm border-t border-zinc-100 pt-5">
+          <div class="flex gap-3">
+            <dt class="sr-only">Localização</dt>
+            <i data-lucide="map-pin" class="w-4 h-4 mt-0.5 shrink-0 text-zinc-400"></i>
+            <dd class="text-zinc-700">Celorico de Basto, Braga</dd>
+          </div>
+          <div class="flex gap-3">
+            <dt class="sr-only">Mobilidade</dt>
+            <i data-lucide="car" class="w-4 h-4 mt-0.5 shrink-0 text-zinc-400"></i>
+            <dd class="text-zinc-700">Viatura própria · presencial, híbrido ou remoto</dd>
+          </div>
+          <div class="flex gap-3">
+            <dt class="sr-only">Disponibilidade</dt>
+            <i data-lucide="clock" class="w-4 h-4 mt-0.5 shrink-0 text-zinc-400"></i>
+            <dd class="text-zinc-700">Disponibilidade total durante o dia</dd>
+          </div>
+          <div class="flex gap-3">
+            <dt class="sr-only">Idiomas</dt>
+            <i data-lucide="languages" class="w-4 h-4 mt-0.5 shrink-0 text-zinc-400"></i>
+            <dd class="text-zinc-700">Português nativo · Inglês avançado (C1)</dd>
+          </div>
+        </dl>
+
+        <a href="./Alexandre-Sousa-CV-Programador.pdf" download class="mt-6 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-800 transition-all">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          Descarregar CV (PDF)
+        </a>
+      </aside>
+
+      <!-- Texto e percurso -->
+      <div class="lg:col-span-3">
+        <span class="text-xs font-bold text-zinc-500 tracking-wider uppercase">Sobre mim</span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-zinc-950 mt-2 mb-5">
+          Gosto de construir sistemas <span class="font-serif-italic font-semibold">do início ao fim</span>.
+        </h2>
+        <div class="space-y-4 text-zinc-600 text-sm sm:text-base leading-relaxed">
+          <p>
+            No estágio na Cruz Vermelha Portuguesa tive a responsabilidade de criar uma plataforma completa: a base de dados, a API, a autenticação e a interface. Foi aí que confirmei que é isto que quero fazer profissionalmente.
+          </p>
+          <p>
+            Continuo a estudar na licenciatura em regime pós-laboral e a desenvolver projetos pessoais, por isso tenho disponibilidade total durante o dia. Procuro uma equipa onde possa aprender com programadores mais experientes e contribuir desde o primeiro dia.
+          </p>
+        </div>
+
+        <!-- Percurso -->
+        <h3 class="text-sm font-bold text-zinc-900 uppercase tracking-wider mt-10 mb-5">Percurso</h3>
+        <ol class="relative border-l-2 border-zinc-200 ml-2 space-y-6">
+          <li class="pl-6 relative">
+            <span class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-white border-2 border-zinc-900" aria-hidden="true"></span>
+            <p class="text-xs font-semibold text-zinc-400">2025 – presente</p>
+            <p class="text-sm font-bold text-zinc-900">Licenciatura em Tecnologia e Gestão de Sistemas de Informação</p>
+            <p class="text-xs text-zinc-500">IEES · Regime pós-laboral</p>
+          </li>
+          <li class="pl-6 relative">
+            <span class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-emerald-500" aria-hidden="true"></span>
+            <p class="text-xs font-semibold text-zinc-400">fev. – jun. 2025</p>
+            <p class="text-sm font-bold text-zinc-900">Estágio como Programador Full-Stack</p>
+            <p class="text-xs text-zinc-500">Cruz Vermelha Portuguesa · Classificação de 15 valores</p>
+          </li>
+          <li class="pl-6 relative">
+            <span class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-white border-2 border-zinc-300" aria-hidden="true"></span>
+            <p class="text-xs font-semibold text-zinc-400">2023 – 2025</p>
+            <p class="text-sm font-bold text-zinc-900">CTeSP em Tecnologia e Programação de Sistemas de Informação</p>
+            <p class="text-xs text-zinc-500">IEES</p>
+          </li>
+        </ol>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 5. CONTACTO                                              -->
   <!-- ======================================================== -->
   <section id="contacto" class="py-20 px-6 md:px-14 bg-white border-t border-zinc-200">
     <div class="max-w-2xl mx-auto">
-      
+
       <div class="text-center mb-10">
         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-xs font-semibold mb-3">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          Resposta habitual em menos de 24h
+          Disponível para começar já
         </span>
-        <h2 class="text-3xl font-extrabold text-zinc-950 mt-1 mb-2">Vamos falar sobre o seu projeto?</h2>
+        <h2 class="text-3xl font-extrabold text-zinc-950 mt-1 mb-2">Vamos conversar?</h2>
         <p class="text-zinc-600 text-sm">
-          Partilhe a sua ideia para receber uma estimativa rápida de prazos e investimento.
+          Se tem uma vaga para programador júnior ou quer saber mais sobre o meu trabalho, envie-me uma mensagem.
         </p>
       </div>
 
-      <!-- Formulário com envio para e-mail -->
-      <form action="https://api.web3forms.com/submit" method="POST" class="space-y-5 bg-zinc-50/50 p-6 sm:p-8 rounded-3xl border border-zinc-200">
+      <!-- Para ativar o envio por e-mail: cria uma chave grátis em https://web3forms.com
+           e substitui SUA_CHAVE_WEB3FORMS abaixo. Enquanto não houver chave, o botão
+           abre o programa de e-mail com a mensagem já preenchida. -->
+      <form id="contactForm" action="https://api.web3forms.com/submit" method="POST" class="space-y-5 bg-zinc-50/50 p-6 sm:p-8 rounded-3xl border border-zinc-200">
         <input type="hidden" name="access_key" value="SUA_CHAVE_WEB3FORMS" />
-        <input type="hidden" name="subject" value="Novo Pedido de Orçamento - AL Dev Studios" />
+        <input type="hidden" name="subject" value="Contacto pelo portfolio - Alexandre Sousa" />
         <input type="checkbox" name="botcheck" class="hidden" style="display: none;" />
 
         <div class="grid sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">O seu nome *</label>
-            <input type="text" name="nome" required placeholder="Ex: Rui Ferreira" class="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all" />
+            <label for="f-nome" class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">Nome *</label>
+            <input id="f-nome" type="text" name="nome" autocomplete="name" required class="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all" />
           </div>
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">O seu e-mail *</label>
-            <input type="email" name="email" required placeholder="rui@empresa.pt" class="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all" />
-          </div>
-        </div>
-
-        <div class="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">WhatsApp / Telefone</label>
-            <input type="tel" name="telefone" placeholder="+351 912 345 678" class="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">Orçamento Previsto</label>
-            <select name="orcamento" class="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all">
-              <option value="A avaliar">A definir / Gostaria de sugestão</option>
-              <option value="Até 300€">Até 300 € (Website simples ou Ajustes)</option>
-              <option value="300€ - 700€">300 € – 700 € (Website completo, Loja ou Dashboard)</option>
-              <option value="Mais de 700€">Mais de 700 € (Plataforma personalizada à medida)</option>
-            </select>
+            <label for="f-email" class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">E-mail *</label>
+            <input id="f-email" type="email" name="email" autocomplete="email" required class="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all" />
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">Que tipo de solução procura?</label>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <label class="flex flex-col p-3 rounded-xl border border-zinc-200 bg-white cursor-pointer hover:border-zinc-900 transition-all has-[:checked]:border-zinc-900 has-[:checked]:bg-zinc-900 has-[:checked]:text-white group">
-              <input type="radio" name="tipo_projeto" value="Website / Loja Online" class="sr-only" checked />
-              <span class="text-xs font-bold mb-0.5">Website / Loja</span>
-              <span class="text-[11px] text-zinc-500 group-has-[:checked]:text-zinc-300">Páginas de apresentação e e-commerce</span>
-            </label>
-            <label class="flex flex-col p-3 rounded-xl border border-zinc-200 bg-white cursor-pointer hover:border-zinc-900 transition-all has-[:checked]:border-zinc-900 has-[:checked]:bg-zinc-900 has-[:checked]:text-white group">
-              <input type="radio" name="tipo_projeto" value="Dashboard / Métricas / Gestão" class="sr-only" />
-              <span class="text-xs font-bold mb-0.5">Dashboards & Métricas</span>
-              <span class="text-[11px] text-zinc-500 group-has-[:checked]:text-zinc-300">Medidores, empresas e clubes</span>
-            </label>
-            <label class="flex flex-col p-3 rounded-xl border border-zinc-200 bg-white cursor-pointer hover:border-zinc-900 transition-all has-[:checked]:border-zinc-900 has-[:checked]:bg-zinc-900 has-[:checked]:text-white group">
-              <input type="radio" name="tipo_projeto" value="Projeto Personalizado / À Medida" class="sr-only" />
-              <span class="text-xs font-bold mb-0.5">Projeto Personalizado</span>
-              <span class="text-[11px] text-zinc-500 group-has-[:checked]:text-zinc-300">Solução exclusiva à medida</span>
-            </label>
-          </div>
+          <label for="f-empresa" class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">Empresa</label>
+          <input id="f-empresa" type="text" name="empresa" autocomplete="organization" class="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all" />
         </div>
 
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">Mensagem / Resumo do Pedido *</label>
-          <textarea name="mensagem" rows="4" required placeholder="Descreva brevemente o seu projeto, clube ou empresa e o que pretende alcançar..." class="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all resize-none"></textarea>
+          <label for="f-mensagem" class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">Mensagem *</label>
+          <textarea id="f-mensagem" name="mensagem" rows="4" required class="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 transition-all resize-none"></textarea>
         </div>
 
-        <button type="submit" class="w-full py-4 rounded-xl bg-zinc-950 text-white font-bold text-sm hover:bg-zinc-800 transition-all shadow-lg active:scale-[0.99] flex items-center justify-center gap-2">
+        <button type="submit" id="submitBtn" class="w-full py-4 rounded-xl bg-zinc-950 text-white font-bold text-sm hover:bg-zinc-800 transition-all shadow-lg active:scale-[0.99] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-wait">
           <i data-lucide="send" class="w-4 h-4"></i>
-          Pedir Proposta Sem Compromisso
+          <span id="submitLabel">Enviar mensagem</span>
         </button>
+
+        <p id="formStatus" role="status" aria-live="polite" class="hidden text-sm text-center rounded-xl px-4 py-3"></p>
       </form>
 
-      <!-- Contactos Diretos de Rodapé -->
+      <!-- Contactos diretos -->
       <div class="mt-8 flex flex-wrap justify-center items-center gap-6 text-xs text-zinc-600">
-        <a href="mailto:alexandre.lapeiras@gmail.com" class="inline-flex items-center gap-1.5 hover:text-zinc-950 font-medium">
+        <a id="contactEmail" href="mailto:josealapeira@gmail.com" class="inline-flex items-center gap-1.5 hover:text-zinc-950 font-medium">
           <i data-lucide="mail" class="w-3.5 h-3.5 text-zinc-500"></i>
-          alexandre.lapeiras@gmail.com
+          josealapeira@gmail.com
+        </a>
+        <a href="https://www.linkedin.com/in/alexandre-sousa-a750042ab" target="_blank" rel="noreferrer" class="inline-flex items-center gap-1.5 hover:text-zinc-950 font-medium">
+          <svg class="w-3.5 h-3.5 fill-[#0A66C2]" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+          LinkedIn
         </a>
         <a href="https://wa.me/351965180804" target="_blank" rel="noreferrer" class="inline-flex items-center gap-1.5 hover:text-zinc-950 font-medium">
-          <svg class="w-3.5 h-3.5 fill-[#25D366]" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+          <i data-lucide="phone" class="w-3.5 h-3.5 text-zinc-500"></i>
           +351 965 180 804
         </a>
       </div>
@@ -420,25 +580,28 @@
   </section>
 
   <!-- ======================================================== -->
-  <!-- 5. RODAPÉ                                                -->
+  <!-- 6. RODAPÉ                                                -->
   <!-- ======================================================== -->
   <footer class="py-8 text-center text-xs text-zinc-500 border-t border-zinc-200 bg-zinc-50 pb-24">
-    <p>© 2026 AL Dev Studios — Alexandre Sousa. Websites, Dashboards de Métricas & Projetos Personalizados.</p>
+    <p>© 2026 Alexandre Sousa · Programador Full-Stack Júnior</p>
   </footer>
 
   <!-- ======================================================== -->
-  <!-- 6. BARRA FLUTUANTE (DOCK NAVIGATION)                     -->
+  <!-- 7. BARRA FLUTUANTE (DOCK NAVIGATION)                     -->
   <!-- ======================================================== -->
   <div class="fixed bottom-6 inset-x-0 z-50 flex justify-center pointer-events-none px-4">
     <nav class="pointer-events-auto flex items-center gap-1.5 p-2 rounded-full bg-white/80 backdrop-blur-xl border border-zinc-200/90 shadow-xl shadow-zinc-900/5">
       <a href="#inicio" aria-label="Início" class="p-2.5 rounded-full text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
         <i data-lucide="home" class="w-4 h-4"></i>
       </a>
-      <a href="#servicos" aria-label="Serviços" class="p-2.5 rounded-full text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
-        <i data-lucide="briefcase" class="w-4 h-4"></i>
-      </a>
       <a href="#projetos" aria-label="Projetos" class="p-2.5 rounded-full text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
         <i data-lucide="folder-git-2" class="w-4 h-4"></i>
+      </a>
+      <a href="#competencias" aria-label="Competências" class="p-2.5 rounded-full text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
+        <i data-lucide="layers" class="w-4 h-4"></i>
+      </a>
+      <a href="#sobre" aria-label="Sobre mim" class="p-2.5 rounded-full text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
+        <i data-lucide="user" class="w-4 h-4"></i>
       </a>
       <a href="#contacto" aria-label="Contacto" class="p-2.5 rounded-full text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
         <i data-lucide="mail" class="w-4 h-4"></i>
@@ -474,6 +637,72 @@
 
       heroSection.addEventListener('mouseleave', () => {
         root.style.setProperty('--reveal-opacity', '0');
+      });
+
+      heroSection.addEventListener('touchend', () => {
+        root.style.setProperty('--reveal-opacity', '0');
+      }, { passive: true });
+    }
+
+    // ===== Envio do formulário de contacto =====
+    const form = document.getElementById('contactForm');
+    const statusEl = document.getElementById('formStatus');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitLabel = document.getElementById('submitLabel');
+    const CONTACT_EMAIL = document.getElementById('contactEmail').getAttribute('href').replace('mailto:', '');
+
+    function showStatus(message, type) {
+      const styles = {
+        success: 'bg-emerald-50 text-emerald-800 border border-emerald-200',
+        error: 'bg-red-50 text-red-800 border border-red-200',
+        info: 'bg-zinc-100 text-zinc-800 border border-zinc-200'
+      };
+      statusEl.className = `text-sm text-center rounded-xl px-4 py-3 ${styles[type]}`;
+      statusEl.textContent = message;
+    }
+
+    function sendViaEmailApp(data) {
+      const subject = `Contacto pelo portfolio${data.get('empresa') ? ' - ' + data.get('empresa') : ''}`;
+      const body = [
+        data.get('mensagem'),
+        '',
+        `${data.get('nome')} (${data.get('email')})`,
+        data.get('empresa') || null
+      ].filter(line => line !== null).join('\n');
+      window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = new FormData(form);
+
+        // Sem chave Web3Forms configurada: abrir o programa de e-mail
+        if (data.get('access_key') === 'SUA_CHAVE_WEB3FORMS') {
+          sendViaEmailApp(data);
+          showStatus('A abrir o seu programa de e-mail com a mensagem já preenchida.', 'info');
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitLabel.textContent = 'A enviar...';
+
+        try {
+          const res = await fetch(form.action, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json' },
+            body: data
+          });
+          const json = await res.json();
+          if (!res.ok || !json.success) throw new Error(json.message || 'Erro no envio');
+          form.reset();
+          showStatus('Mensagem enviada! Respondo o mais rápido possível.', 'success');
+        } catch (err) {
+          showStatus(`Não foi possível enviar. Escreva-me diretamente para ${CONTACT_EMAIL}.`, 'error');
+        } finally {
+          submitBtn.disabled = false;
+          submitLabel.textContent = 'Enviar mensagem';
+        }
       });
     }
   </script>

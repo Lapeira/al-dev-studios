@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Painel de Rendimento | AL Dev Studios Sport Metrics</title>
+  <title>Painel de Rendimento | Projeto de Alexandre Sousa</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Ícones Lucide -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@1.59.0/dist/umd/lucide.min.js"></script>
 
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -23,6 +23,18 @@
 <body class="bg-[#f4f4f5] text-zinc-900 pb-16">
 
   <!-- BARRA DE TOPO DO DASHBOARD -->
+  <!-- BARRA DE DEMO (escondida quando a página aparece como miniatura no portfolio) -->
+  <div id="demoBar" class="bg-zinc-900 text-zinc-300 text-[11px] sm:text-xs">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-2 flex items-center justify-between gap-3">
+      <a href="../index.html#projetos" class="inline-flex items-center gap-1.5 font-semibold text-white hover:underline">
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+        Voltar ao portfolio
+      </a>
+      <span>Dados fictícios · Projeto pessoal de <strong class="text-white">Alexandre Sousa</strong></span>
+    </div>
+  </div>
+  <script>if (window.self !== window.top) document.getElementById('demoBar').remove();</script>
+
   <header class="bg-white border-b border-zinc-200 sticky top-0 z-30">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -38,7 +50,7 @@
       <div class="flex items-center gap-2">
         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          Época 2026/27 Ativa
+          Época 2025/26
         </span>
       </div>
     </div>
@@ -99,7 +111,7 @@
     <div class="bg-white p-6 rounded-2xl border border-zinc-200/80 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 class="font-extrabold text-base text-zinc-900">Evolução de Pontos por Jornada</h2>
+          <h2 class="font-extrabold text-base text-zinc-900">Evolução de Pontos por Mês</h2>
           <p class="text-xs text-zinc-400">Desempenho acumulado ao longo da época</p>
         </div>
         <div class="flex items-center gap-2">
@@ -111,29 +123,29 @@
 
       <!-- Gráfico em Barras Interativas com CSS Flex -->
       <div class="h-44 flex items-end gap-3 sm:gap-6 pt-6 border-b border-zinc-100 px-2">
-        <div class="flex-1 flex flex-col items-center gap-2 group">
+        <div class="flex-1 h-full flex flex-col justify-end items-center gap-2 group">
           <span class="text-[10px] font-bold text-zinc-400 group-hover:text-zinc-900">9 pts</span>
-          <div class="w-full bg-zinc-200 rounded-t-lg group-hover:bg-zinc-900 transition-all" style="height: 45%;"></div>
+          <div class="w-full flex-1 flex items-end"><div class="w-full bg-zinc-200 rounded-t-lg group-hover:bg-zinc-900 transition-all" style="height: 45%;"></div></div>
           <span class="text-[11px] text-zinc-500 font-semibold">Out</span>
         </div>
-        <div class="flex-1 flex flex-col items-center gap-2 group">
+        <div class="flex-1 h-full flex flex-col justify-end items-center gap-2 group">
           <span class="text-[10px] font-bold text-zinc-400 group-hover:text-zinc-900">15 pts</span>
-          <div class="w-full bg-zinc-200 rounded-t-lg group-hover:bg-zinc-900 transition-all" style="height: 65%;"></div>
+          <div class="w-full flex-1 flex items-end"><div class="w-full bg-zinc-200 rounded-t-lg group-hover:bg-zinc-900 transition-all" style="height: 65%;"></div></div>
           <span class="text-[11px] text-zinc-500 font-semibold">Nov</span>
         </div>
-        <div class="flex-1 flex flex-col items-center gap-2 group">
+        <div class="flex-1 h-full flex flex-col justify-end items-center gap-2 group">
           <span class="text-[10px] font-bold text-zinc-400 group-hover:text-zinc-900">12 pts</span>
-          <div class="w-full bg-zinc-200 rounded-t-lg group-hover:bg-zinc-900 transition-all" style="height: 55%;"></div>
+          <div class="w-full flex-1 flex items-end"><div class="w-full bg-zinc-200 rounded-t-lg group-hover:bg-zinc-900 transition-all" style="height: 55%;"></div></div>
           <span class="text-[11px] text-zinc-500 font-semibold">Dez</span>
         </div>
-        <div class="flex-1 flex flex-col items-center gap-2 group">
+        <div class="flex-1 h-full flex flex-col justify-end items-center gap-2 group">
           <span class="text-[10px] font-bold text-zinc-400 group-hover:text-zinc-900">18 pts</span>
-          <div class="w-full bg-zinc-200 rounded-t-lg group-hover:bg-zinc-900 transition-all" style="height: 80%;"></div>
+          <div class="w-full flex-1 flex items-end"><div class="w-full bg-zinc-200 rounded-t-lg group-hover:bg-zinc-900 transition-all" style="height: 80%;"></div></div>
           <span class="text-[11px] text-zinc-500 font-semibold">Jan</span>
         </div>
-        <div class="flex-1 flex flex-col items-center gap-2 group">
+        <div class="flex-1 h-full flex flex-col justify-end items-center gap-2 group">
           <span class="text-[10px] font-bold text-zinc-400 group-hover:text-zinc-900">22 pts</span>
-          <div class="w-full bg-emerald-500 rounded-t-lg group-hover:bg-emerald-600 transition-all shadow-sm" style="height: 95%;"></div>
+          <div class="w-full flex-1 flex items-end"><div class="w-full bg-emerald-500 rounded-t-lg group-hover:bg-emerald-600 transition-all shadow-sm" style="height: 95%;"></div></div>
           <span class="text-[11px] text-zinc-900 font-bold">Fev</span>
         </div>
       </div>
@@ -144,7 +156,7 @@
       <div class="p-5 border-b border-zinc-100 flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
         <div>
           <h2 class="font-extrabold text-base text-zinc-900">Registo de Atletas & Estatísticas</h2>
-          <p class="text-xs text-zinc-400">Acompanhamento individual de rendimento</p>
+          <p class="text-xs text-zinc-400">Destaques do plantel • 5 de 20 atletas</p>
         </div>
         
         <div class="relative w-full sm:w-64">

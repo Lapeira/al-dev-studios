@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
   
   <!-- Ícones Lucide -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@1.59.0/dist/umd/lucide.min.js"></script>
 
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -22,6 +22,18 @@
   </style>
 </head>
 <body class="bg-zinc-50 text-zinc-900 pb-20">
+
+  <!-- BARRA DE DEMO (escondida quando a página aparece como miniatura no portfolio) -->
+  <div id="demoBar" class="bg-zinc-900 text-zinc-300 text-[11px] sm:text-xs">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-2 flex items-center justify-between gap-3">
+      <a href="../index.html#projetos" class="inline-flex items-center gap-1.5 font-semibold text-white hover:underline">
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+        Voltar ao portfolio
+      </a>
+      <span>Projeto pessoal de <strong class="text-white">Alexandre Sousa</strong></span>
+    </div>
+  </div>
+  <script>if (window.self !== window.top) document.getElementById('demoBar').remove();</script>
 
   <!-- CABEÇALHO DA LOJA -->
   <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-zinc-200">
@@ -156,12 +168,17 @@
     const productsGrid = document.getElementById('productsGrid');
     const emptyState = document.getElementById('emptyState');
 
+    // Pesquisa sem acentos nem maiúsculas: "ambar" encontra "Âmbar"
+    function normalize(text) {
+      return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().trim();
+    }
+
     function renderProducts() {
       // Filtrar por categoria e por termo de pesquisa
+      const q = normalize(searchQuery);
       const filtered = products.filter(p => {
         const matchesCategory = currentCategory === 'todos' || p.category === currentCategory;
-        const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                              p.notes.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = normalize(p.name).includes(q) || normalize(p.notes).includes(q);
         return matchesCategory && matchesSearch;
       });
 
