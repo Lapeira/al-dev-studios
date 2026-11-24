@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal da Oficina | Transportes Norte Sul</title>
+  <meta name="description" content="Portal para oficinas parceiras: camiões em reparação, fases, previsão, orçamentos para aprovação e notas para a central." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@1.59.0/dist/umd/lucide.min.js"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .toast-in { animation: toastIn .25s ease-out; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .phase-btn[aria-current="step"] { background: #18181b; color: #fff; border-color: #18181b; }
+    .scroll-thin::-webkit-scrollbar { width: 6px; }
+    .scroll-thin::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 6px; }
+  </style>
+</head>
+<body class="bg-[#f4f4f5] text-zinc-900 min-h-screen">
+
+  <!-- ENTRAR (com servidor) -->
+  <section id="screen-login" class="hidden min-h-screen flex items-center justify-center p-4">
+    <form id="loginForm" class="w-full max-w-sm bg-white rounded-2xl shadow-xl border border-zinc-200 p-6 space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-zinc-900 text-white flex items-center justify-center"><i data-lucide="wrench" class="w-5 h-5"></i></div>
+        <div><h1 class="text-base font-extrabold">Portal da Oficina</h1><p class="text-xs text-zinc-500">Transportes Norte Sul · parceiros de manutenção</p></div>
+      </div>
+      <label class="block"><span class="text-xs font-semibold text-zinc-600">Email</span>
+        <input id="loginEmail" type="email" required autocomplete="username" class="mt-1 w-full px-3 py-2.5 text-sm bg-zinc-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-300" /></label>
+      <label class="block"><span class="text-xs font-semibold text-zinc-600">Palavra-passe</span>
+        <input id="loginPass" type="password" required autocomplete="current-password" class="mt-1 w-full px-3 py-2.5 text-sm bg-zinc-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-300" /></label>
+      <p id="loginError" class="hidden text-xs font-semibold text-red-600"></p>
+      <button id="loginBtn" class="w-full py-2.5 rounded-lg bg-zinc-900 text-white text-sm font-bold disabled:opacity-50">Entrar</button>
+      <p class="text-[11px] text-zinc-400 text-center">O acesso é dado pela Transportes Norte Sul. Pede-o ao gestor de frota.</p>
+    </form>
+  </section>
+
+  <!-- ESCOLHER OFICINA (modo demo, sem servidor) -->
+  <section id="screen-pick" class="hidden min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-zinc-200 p-6 space-y-4">
+      <div><h1 class="text-base font-extrabold">Portal da Oficina · demonstração</h1>
+        <p class="text-xs text-zinc-500">Sem servidor: escolhe a oficina. Esta página liga-se ao painel da central aberto noutro separador do mesmo browser.</p></div>
+      <p id="pickWait" class="text-sm text-zinc-500 flex items-center gap-2"><i data-lucide="loader-circle" class="w-4 h-4 animate-spin"></i>A ligar à central…</p>
+      <div id="pickHelp" class="hidden text-xs text-zinc-500 bg-zinc-50 rounded-xl p-3 space-y-2">
+        <p>Não encontrei a central. Abre o painel noutro separador e esta página liga-se sozinha.</p>
+        <a href="index.html" target="_blank" rel="noopener" class="block text-center py-2 rounded-lg bg-zinc-900 text-white font-bold">Abrir o painel da central</a>
+      </div>
+      <ul id="pickList" class="space-y-1.5 max-h-[60vh] overflow-y-auto scroll-thin"></ul>
+    </div>
+  </section>
+
+  <!-- PORTAL -->
+  <div id="app" class="hidden">
+    <header class="bg-white border-b border-zinc-200 sticky top-0 z-20">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-zinc-900 text-white flex items-center justify-center shrink-0"><i data-lucide="wrench" class="w-5 h-5"></i></div>
+          <div class="min-w-0">
+            <h1 id="wsName" class="text-sm font-bold leading-tight truncate">—</h1>
+            <p class="text-[11px] text-zinc-400 font-medium flex items-center gap-1.5"><span id="connDot" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span id="wsSub">—</span></p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-semibold text-zinc-600">
+          <span class="bg-zinc-100 rounded-lg px-2.5 py-1.5 inline-flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5"></i><span id="clock">--:--</span></span>
+          <span class="bg-zinc-100 rounded-lg pl-2.5 pr-1 py-1 inline-flex items-center gap-1.5"><i data-lucide="user" class="w-3.5 h-3.5"></i><span id="userName">—</span>
+            <button id="logoutBtn" class="p-1 rounded-md hover:bg-zinc-200" title="Sair" aria-label="Sair"><i data-lucide="log-out" class="w-3.5 h-3.5"></i></button></span>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      <div>
+        <h2 class="font-extrabold text-base">Camiões na oficina <span id="count" class="text-zinc-400"></span></h2>
+        <p class="text-xs text-zinc-500">Atualiza a fase, a previsão e as notas: a central vê tudo em tempo real. Nas oficinas parceiras, a reparação só avança depois de o orçamento ser aprovado.</p>
+      </div>
+      <div id="cards" class="grid grid-cols-1 xl:grid-cols-2 gap-4"></div>
+
+      <div class="bg-white rounded-2xl border border-zinc-200/80 shadow-sm p-5">
+        <h2 class="font-extrabold text-base mb-1">Reparações recentes</h2>
+        <p class="text-xs text-zinc-400 mb-3">Camiões que já saíram desta oficina.</p>
+        <div class="overflow-x-auto scroll-thin"><table class="w-full text-sm min-w-[560px]">
+          <thead class="text-[11px] uppercase tracking-wide text-zinc-400 text-left"><tr><th class="py-2 pr-3">Camião</th><th class="py-2 pr-3">Trabalho</th><th class="py-2 pr-3">Entrada</th><th class="py-2 pr-3">Saída</th><th class="py-2 pr-3">Anexos</th><th class="py-2 text-right">Custo</th></tr></thead>
+          <tbody id="history" class="divide-y divide-zinc-100"></tbody>
+        </table></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- CONCLUIR REPARAÇÃO -->
+  <div id="finishModal" class="hidden fixed inset-0 z-40 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <form id="finishForm" class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-5 space-y-3">
+      <div class="flex items-center justify-between"><h3 id="finishTitle" class="text-base font-extrabold">Concluir reparação</h3>
+        <button type="button" data-close-finish class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400" aria-label="Fechar"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+      <p class="text-xs text-zinc-500">O camião volta ao serviço e o motorista é avisado de que pode ir buscá-lo. O custo final fica nos custos da frota.</p>
+      <p id="finishWarn" class="hidden text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2.5">Ainda não anexaste a fatura. Depois de concluíres só a central a pode juntar.</p>
+      <label class="block"><span class="text-xs font-semibold text-zinc-600">Custo final (€)</span>
+        <input id="finishCost" inputmode="decimal" required class="mt-1 w-full px-3 py-2.5 text-sm bg-zinc-100 rounded-lg tabular-nums" /></label>
+      <label class="block"><span class="text-xs font-semibold text-zinc-600">Nota final (opcional)</span>
+        <input id="finishNote" maxlength="300" placeholder="Ex.: discos e pastilhas substituídos, travões testados" class="mt-1 w-full px-3 py-2.5 text-sm bg-zinc-100 rounded-lg" /></label>
+      <button class="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold inline-flex items-center justify-center gap-1.5"><i data-lucide="circle-check" class="w-4 h-4"></i>Camião pronto</button>
+    </form>
+  </div>
+
+  <div id="toasts" class="fixed bottom-4 right-4 z-50 space-y-2 w-[min(340px,calc(100vw-2rem))]"></div>
+
+<script src="js/frota-core.js"></script>
+<script>
+/* ==========================================================================
+   PORTAL DA OFICINA
+   • servidor: entrada com email e palavra-passe; WebSocket /ws?role=oficina
+   • demo: escolhe-se a oficina e fala-se com o painel pelo BroadcastChannel
+   ========================================================================== */
+const C = FrotaCore;
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const icons = () => lucide.createIcons({ nameAttr: 'data-lucide' });
+const EUR = new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 });
+const when = (t) => t ? `${C.fmtDate(t)} ${C.fmtTime(t)}` : '';
+
+let mode = null, ws = null, wsRetry = 0, leaving = false;
+let me = null;                 // utilizador (modo servidor)
+let wid = null;                // oficina
+let snap = null, lastSig = '', lastAt = 0;
+const bus = 'BroadcastChannel' in window ? new BroadcastChannel('frota-norte-sul') : null;
+const bcPost = (m) => { if (bus) try { bus.postMessage(m); } catch (e) { /* ignorar */ } };
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignorar */ } } };
+
+function show(screen) { ['screen-login', 'screen-pick', 'app'].forEach(id => $(id).classList.toggle('hidden', id !== screen)); }
+
+function send(action) {
+  if (mode === 'servidor') { if (ws && ws.readyState === 1) ws.send(JSON.stringify(action)); else toast('warn', 'Sem ligação', 'A tentar religar ao servidor…'); }
+  else bcPost({ type: 'oficinaAction', workshopId: wid, by: snap ? snap.workshop.name : 'Oficina', action });
+}
+
+function toast(kind, title, text) {
+  const el = document.createElement('div');
+  el.className = `toast-in bg-white border ${kind === 'warn' ? 'border-amber-300' : kind === 'ok' ? 'border-emerald-300' : 'border-blue-200'} rounded-xl shadow-lg p-3 flex gap-2.5 items-start`;
+  el.innerHTML = `<i data-lucide="${kind === 'warn' ? 'triangle-alert' : kind === 'ok' ? 'circle-check' : 'bell'}" class="w-4 h-4 mt-0.5 shrink-0"></i><div class="min-w-0"><p class="text-xs font-bold">${esc(title)}</p><p class="text-[11px] text-zinc-500 leading-snug">${esc(text || '')}</p></div>`;
+  el.onclick = () => el.remove();
+  $('toasts').appendChild(el); icons();
+  while ($('toasts').children.length > 4) $('toasts').firstChild.remove();
+  setTimeout(() => el.remove(), 7000);
+}
+
+/* ---------- estado ---------- */
+function onState(s) {
+  const firstTime = !snap;
+  const before = snap ? new Set(snap.vehicles.map(v => v.id)) : null;
+  snap = s; lastAt = Date.now();
+  if (before) s.vehicles.forEach(v => { if (!before.has(v.id)) toast('info', `Chegou um camião: ${v.plate}`, v.workshop.reason); });
+  show('app');
+  $('wsName').textContent = s.workshop.name;
+  $('wsSub').textContent = `Oficina ${s.workshop.type.toLowerCase()} · ${C.COUNTRY[s.workshop.cc] || ''}${mode === 'demo' ? ' · demonstração' : ''}`;
+  $('clock').textContent = when(s.simNow);
+  $('userName').textContent = mode === 'servidor' && me ? me.name : 'Demo';
+  $('count').textContent = `(${s.vehicles.length})`;
+  // só voltar a desenhar os cartões quando algo muda (para não apagar o que se está a escrever)
+  const sig = JSON.stringify(s.vehicles.map(v => { const { elapsedH, remainingH, overdue, ...w } = v.workshop; return [v.id, w]; })) + '|' + s.history.length;
+  if (sig !== lastSig || firstTime) { lastSig = sig; renderCards(); renderHistory(); }
+  updateLive();
+}
+
+function phaseButtons(v) {
+  const ws = v.workshop, locked = C.needsQuote(ws);
+  return Object.entries(C.WS_PHASES).map(([k, l]) => {
+    const dis = locked && (k === 'reparacao' || k === 'testes');
+    return `<button data-phase="${k}" data-vid="${v.id}" ${ws.phase === k ? 'aria-current="step"' : ''} ${dis ? 'disabled title="Precisa do orçamento aprovado"' : ''}
+      class="phase-btn flex-1 min-w-[96px] px-2 py-2 rounded-lg border border-zinc-200 text-[11px] font-bold hover:bg-zinc-50 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-1">${dis ? '<i data-lucide="lock" class="w-3 h-3"></i>' : ''}${l}</button>`;
+  }).join('');
+}
+
+function quoteBox(v) {
+  const ws = v.workshop, q = ws.quote, ext = ws.type === 'Externa';
+  if (q && q.status === 'pendente') return `<div class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs">
+      <div class="font-bold text-amber-800 flex items-center gap-1.5"><i data-lucide="hourglass" class="w-3.5 h-3.5"></i>Orçamento de ${EUR.format(q.amount)} a aguardar aprovação da central</div>
+      <div class="text-zinc-600 mt-1">${esc(q.description)}</div><div class="text-[10px] text-zinc-400 mt-1">Enviado ${when(q.sentAt)} por ${esc(q.by)}</div></div>`;
+  if (q && q.status === 'aprovado') return `<div class="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs">
+      <div class="font-bold text-emerald-800 flex items-center gap-1.5"><i data-lucide="circle-check" class="w-3.5 h-3.5"></i>Orçamento de ${EUR.format(q.amount)} aprovado</div>
+      <div class="text-zinc-600 mt-1">${esc(q.description)}</div><div class="text-[10px] text-zinc-400 mt-1">Aprovado ${when(q.decidedAt)} por ${esc(q.decidedBy || '')}</div></div>`;
+  const refused = q && q.status === 'recusado' ? `<div class="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700 mb-2"><b>Orçamento de ${EUR.format(q.amount)} recusado</b>${q.reason ? `: ${esc(q.reason)}` : ''}. Envia um novo.</div>` : '';
+  return `${refused}<form data-quote="${v.id}" class="rounded-xl border border-zinc-200 p-3 space-y-2">
+      <div class="text-xs font-bold flex items-center gap-1.5"><i data-lucide="file-text" class="w-3.5 h-3.5"></i>${ext ? 'Orçamento para aprovação' : 'Custo estimado (opcional)'}</div>
+      <div class="grid grid-cols-[110px_1fr] gap-2">
+        <input name="amount" data-keep="${v.id}-qa" inputmode="decimal" placeholder="€" required class="px-2.5 py-2 text-sm bg-zinc-100 rounded-lg tabular-nums" />
+        <input name="description" data-keep="${v.id}-qd" maxlength="400" required placeholder="Peças, mão de obra, horas…" class="px-2.5 py-2 text-sm bg-zinc-100 rounded-lg" />
+      </div>
+      <button class="w-full py-2 rounded-lg bg-zinc-900 text-white text-xs font-bold">${ext ? 'Enviar orçamento à central' : 'Enviar estimativa'}</button>
+    </form>`;
+}
+
+// ---------- faturas e fotos ----------
+const kb = (n) => n >= 1048576 ? `${(n / 1048576).toFixed(1).replace('.', ',')} MB` : `${Math.max(1, Math.round(n / 1024))} KB`;
+function attachTile(v, a, canDelete) {
+  const del = canDelete ? `<button data-detach="${esc(a.id)}" data-vid="${v.id}" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white border border-zinc-300 text-zinc-500 hover:text-red-600 hover:border-red-300 flex items-center justify-center shadow-sm" title="Apagar" aria-label="Apagar ${esc(a.name)}"><i data-lucide="x" class="w-3 h-3"></i></button>` : '';
+  const tag = a.kind === 'fatura' ? '<span class="absolute bottom-1 left-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-zinc-900/80 text-white">Fatura</span>' : '';
+  const inner = a.mime.startsWith('image/')
+    ? `<img src="${esc(a.url)}" alt="${esc(a.name)}" loading="lazy" class="w-full h-full object-cover">`
+    : `<span class="w-full h-full flex flex-col items-center justify-center gap-0.5 text-zinc-500"><i data-lucide="file-text" class="w-6 h-6"></i><span class="text-[9px] font-bold">PDF</span></span>`;
+  return `<div class="relative w-20 h-20 shrink-0" title="${esc(a.name)} · ${kb(a.size || 0)}${a.number ? ' · n.º ' + esc(a.number) : ''}">
+    <a href="${esc(a.url)}" target="_blank" rel="noopener" class="block w-full h-full rounded-lg overflow-hidden border border-zinc-200 bg-zinc-50">${inner}</a>${tag}${del}</div>`;
+}
+function attachBox(v) {
+  const ws = v.workshop, atts = ws.attachments || [];
+  const inv = ws.invoice;
+  return `<div>
+    <div class="flex items-center justify-between mb-1.5"><span class="text-[11px] font-bold text-zinc-500 uppercase tracking-wide">Faturas e fotos</span>
+      ${inv ? `<span class="text-[11px] font-semibold text-emerald-700 inline-flex items-center gap-1"><i data-lucide="receipt" class="w-3.5 h-3.5"></i>Fatura${inv.number ? ' ' + esc(inv.number) : ''}${inv.amount ? ' · ' + EUR.format(inv.amount) : ''}</span>` : ws.type === 'Externa' ? '<span class="text-[11px] text-zinc-400">sem fatura</span>' : ''}</div>
+    ${atts.length ? `<div class="flex flex-wrap gap-2.5 mb-2">${atts.map(a => attachTile(v, a, true)).join('')}</div>` : '<p class="text-[11px] text-zinc-400 mb-2">Fotos das peças substituídas e a fatura ajudam a central a aprovar e a pagar mais depressa.</p>'}
+    <div class="flex flex-wrap gap-2">
+      <label class="cursor-pointer px-3 py-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-xs font-bold inline-flex items-center gap-1.5"><i data-lucide="camera" class="w-3.5 h-3.5"></i>Adicionar fotos
+        <input type="file" accept="image/*" capture="environment" multiple data-photos="${v.id}" class="hidden" /></label>
+      <button type="button" data-invoice-open="${v.id}" class="px-3 py-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-xs font-bold inline-flex items-center gap-1.5"><i data-lucide="receipt" class="w-3.5 h-3.5"></i>${inv ? 'Substituir fatura' : 'Anexar fatura'}</button>
+    </div>
+    <form data-invoice="${v.id}" class="hidden mt-2 rounded-xl border border-zinc-200 p-3 space-y-2">
+      <input name="file" type="file" accept="application/pdf,image/*" required class="block w-full text-xs file:mr-2 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-zinc-900 file:text-white file:text-xs file:font-bold" />
+      <div class="grid grid-cols-2 gap-2">
+        <input name="number" maxlength="40" placeholder="N.º da fatura" class="px-2.5 py-2 text-sm bg-zinc-100 rounded-lg" />
+        <input name="amount" inputmode="decimal" placeholder="Valor (€)" class="px-2.5 py-2 text-sm bg-zinc-100 rounded-lg tabular-nums" />
+      </div>
+      <button class="w-full py-2 rounded-lg bg-zinc-900 text-white text-xs font-bold">Enviar fatura</button>
+    </form>
+    <p data-uploading="${v.id}" class="hidden text-[11px] text-zinc-500 mt-1.5 items-center gap-1.5"><i data-lucide="loader-circle" class="w-3.5 h-3.5 animate-spin"></i>A enviar…</p>
+  </div>`;
+}
+
+// reduzir fotos antes de enviar (poupa dados móveis); PDFs vão como estão
+function loadImg(file) { return new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ko(new Error('Não consegui ler a imagem.')); i.src = URL.createObjectURL(file); }); }
+async function prepareFile(file, kind) {
+  if (file.type === 'application/pdf') {
+    if (file.size > C.ATTACH_MAX) throw new Error('PDF demasiado grande (máx. 8 MB).');
+    return { blob: file, mime: 'application/pdf', name: file.name };
+  }
+  if (!file.type.startsWith('image/')) throw new Error('Só PDF ou imagens.');
+  const img = await loadImg(file);
+  const max = kind === 'fatura' ? 2200 : 1600, k = Math.min(1, max / Math.max(img.width, img.height));
+  const c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+  URL.revokeObjectURL(img.src);
+  const blob = await new Promise(ok => c.toBlob(ok, 'image/jpeg', 0.82));
+  return { blob, mime: 'image/jpeg', name: file.name.replace(/\.[^.]+$/, '') + '.jpg' };
+}
+const toDataUrl = (blob) => new Promise(ok => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(blob); });
+async function uploadFile(vid, kind, file, extra = {}) {
+  const f = await prepareFile(file, kind);
+  if (mode === 'servidor') {
+    const qs = new URLSearchParams({ papel: 'oficina', tipo: kind, veiculo: vid, nome: f.name });
+    if (extra.number) qs.set('numero', extra.number);
+    if (extra.amount) qs.set('valor', extra.amount);
+    const r = await fetch(`/api/anexos?${qs}`, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': f.mime }, body: f.blob });
+    const b = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(b.error || 'Não foi possível enviar.');
+  } else {
+    send({ type: 'attach', vid, kind, mime: f.mime, url: await toDataUrl(f.blob), name: f.name, size: f.blob.size, number: extra.number, amount: extra.amount });
+  }
+}
+function busy(vid, on) { const el = document.querySelector(`[data-uploading="${vid}"]`); if (el) { el.classList.toggle('hidden', !on); el.classList.toggle('flex', on); } }
+async function removeAttachment(vid, id) {
+  if (!confirm('Apagar este anexo?')) return;
+  if (mode === 'servidor') {
+    const r = await fetch(`/api/anexos/${encodeURIComponent(id)}?papel=oficina`, { method: 'DELETE', credentials: 'same-origin' });
+    const b = await r.json().catch(() => ({}));
+    if (!r.ok) toast('warn', 'Não foi possível apagar', b.error);
+  } else send({ type: 'detach', vid, id });
+}
+document.addEventListener('change', async (e) => {
+  const vid = e.target.dataset && e.target.dataset.photos;
+  if (!vid) return;
+  const files = [...e.target.files]; e.target.value = '';
+  busy(vid, true);
+  let ok = 0;
+  for (const f of files.slice(0, 10)) { try { await uploadFile(vid, 'foto', f); ok++; } catch (err) { toast('warn', f.name, err.message); } }
+  busy(vid, false);
+  if (ok) toast('ok', `${ok} foto${ok > 1 ? 's' : ''} enviada${ok > 1 ? 's' : ''}`, 'A central já as pode ver.');
+});
+
+function renderCards() {
+  // guardar o que está escrito nos campos antes de redesenhar
+  const kept = {};
+  document.querySelectorAll('[data-keep]').forEach(i => { if (i.value) kept[i.dataset.keep] = i.value; });
+  const focus = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.keep : null;
+
+  $('cards').innerHTML = snap.vehicles.map(v => {
+    const ws = v.workshop;
+    const openReq = ws.notes.some(n => n.request && !n.answered);
+    return `<article class="bg-white rounded-2xl border ${openReq ? 'border-amber-300' : 'border-zinc-200/80'} shadow-sm p-5 flex flex-col gap-4">
+      <div class="flex items-start justify-between gap-3">
+        <div><div class="text-lg font-black">${esc(v.plate)}</div><div class="text-xs text-zinc-500">${esc(v.model)} · ${C.fmtKm(v.odometer)}</div></div>
+        <div class="text-right text-xs"><div class="font-semibold">${esc(v.driver)}</div><a href="tel:${esc(String(v.phone || '').replace(/\s/g, ''))}" class="text-zinc-500 hover:underline">${esc(v.phone || '')}</a></div>
+      </div>
+      <div class="text-sm"><b>Trabalho:</b> ${esc(ws.reason)}<div class="text-[11px] text-zinc-500 mt-0.5">Entrada ${when(ws.enteredAt)}</div></div>
+      ${openReq ? '<div class="rounded-xl bg-amber-50 border border-amber-200 p-2.5 text-xs font-semibold text-amber-800 flex items-center gap-2"><i data-lucide="message-circle-question" class="w-4 h-4"></i>A central pediu um ponto de situação. Responde com uma nota.</div>' : ''}
+
+      <div>
+        <div class="text-[11px] font-bold text-zinc-500 uppercase tracking-wide mb-1.5">Fase</div>
+        <div class="flex flex-wrap gap-1.5">${phaseButtons(v)}</div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 text-center">
+        <div class="bg-zinc-50 rounded-xl p-2.5"><div class="text-[10px] text-zinc-500 font-semibold">Parado há</div><div class="text-sm font-bold" data-live="elapsed-${v.id}">—</div></div>
+        <div class="bg-zinc-50 rounded-xl p-2.5"><div class="text-[10px] text-zinc-500 font-semibold">Previsão</div><div class="text-sm font-bold" data-live="remain-${v.id}">—</div></div>
+      </div>
+      <form data-estimate="${v.id}" class="flex gap-2 items-center">
+        <span class="text-xs text-zinc-600 whitespace-nowrap">Faltam</span>
+        <input name="hours" data-keep="${v.id}-h" type="number" step="0.5" min="0.5" max="720" required placeholder="horas" class="w-24 px-2.5 py-2 text-sm bg-zinc-100 rounded-lg tabular-nums" />
+        <span class="text-xs text-zinc-600">h</span>
+        <button class="ml-auto px-3 py-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-xs font-bold">Atualizar previsão</button>
+      </form>
+
+      ${quoteBox(v)}
+
+      ${attachBox(v)}
+
+      ${v.parts.length ? `<div><div class="text-[11px] font-bold text-zinc-500 uppercase tracking-wide mb-1.5">Desgaste registado pela central</div>
+        <div class="flex flex-wrap gap-1.5">${v.parts.map(p => `<span class="text-[11px] px-2 py-1 rounded-md ${p.pct >= 95 ? 'bg-red-50 text-red-700' : p.pct >= 85 ? 'bg-amber-50 text-amber-700' : 'bg-zinc-100 text-zinc-600'}">${esc(p.name)} ${Math.round(p.pct)}%</span>`).join('')}</div></div>` : ''}
+
+      <div>
+        <div class="text-[11px] font-bold text-zinc-500 uppercase tracking-wide mb-1.5">Notas</div>
+        <ul class="space-y-1.5 max-h-48 overflow-y-auto scroll-thin">${ws.notes.slice().reverse().map(n => `<li class="text-xs rounded-lg px-2.5 py-1.5 ${n.request ? 'bg-amber-50 border border-amber-200' : n.by === 'Central' ? 'bg-blue-50' : 'bg-zinc-50'}">
+          <span class="font-semibold">${esc(n.by || '')}</span>${n.time ? ` <span class="text-zinc-400">· ${when(n.time)}</span>` : ''}<br>${esc(n.text)}</li>`).join('')}</ul>
+        <form data-note="${v.id}" class="flex gap-2 mt-2">
+          <input name="text" data-keep="${v.id}-n" maxlength="300" required placeholder="${openReq ? 'Responder à central…' : 'Nota para a central…'}" class="flex-1 min-w-0 px-2.5 py-2 text-sm bg-zinc-100 rounded-lg" />
+          <button class="px-3 rounded-lg bg-zinc-900 text-white text-xs font-bold" aria-label="Enviar nota"><i data-lucide="send" class="w-3.5 h-3.5"></i></button>
+        </form>
+      </div>
+
+      <button data-finish="${v.id}" ${C.needsQuote(ws) ? 'disabled title="Falta a aprovação do orçamento"' : ''} class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-200 disabled:text-zinc-500 text-white text-sm font-bold inline-flex items-center justify-center gap-1.5"><i data-lucide="circle-check" class="w-4 h-4"></i>Concluir reparação</button>
+    </article>`;
+  }).join('') || `<div class="xl:col-span-2 bg-white rounded-2xl border border-zinc-200/80 p-10 text-center text-sm text-zinc-500">
+      <i data-lucide="party-popper" class="w-8 h-8 mx-auto mb-2 text-zinc-400"></i>Não há camiões da Norte Sul nesta oficina neste momento.<br><span class="text-xs">Quando a central agendar uma reparação aqui, o camião aparece nesta página.</span></div>`;
+
+  document.querySelectorAll('[data-keep]').forEach(i => { if (kept[i.dataset.keep]) i.value = kept[i.dataset.keep]; if (i.dataset.keep === focus) i.focus(); });
+  icons();
+}
+
+function updateLive() {
+  if (!snap) return;
+  $('clock').textContent = when(snap.simNow);
+  snap.vehicles.forEach(v => {
+    const ws = v.workshop;
+    const e = document.querySelector(`[data-live="elapsed-${v.id}"]`), r = document.querySelector(`[data-live="remain-${v.id}"]`);
+    if (e) e.textContent = C.fmtDuration(ws.elapsedH * 60);
+    if (r) r.innerHTML = ws.waitingParts ? '<span class="text-amber-600">a aguardar peças</span>'
+      : C.needsQuote(ws) ? '<span class="text-amber-600">aguarda orçamento</span>'
+      : ws.remainingH <= 0 ? '<span class="text-red-600">ultrapassada</span>' : `faltam ~${C.fmtDuration(ws.remainingH * 60)}`;
+  });
+}
+
+function renderHistory() {
+  $('history').innerHTML = snap.history.map(h => `<tr><td class="py-2 pr-3"><b>${esc(h.plate)}</b><div class="text-[11px] text-zinc-400">${esc(h.model)}</div></td>
+    <td class="py-2 pr-3 text-xs">${esc(h.reason)}</td><td class="py-2 pr-3 text-xs whitespace-nowrap">${when(h.enteredAt)}</td><td class="py-2 pr-3 text-xs whitespace-nowrap">${when(h.leftAt)}</td>
+    <td class="py-2 pr-3 text-xs">${(h.attachments || []).map(a => `<a href="${esc(a.url)}" target="_blank" rel="noopener" class="inline-flex items-center gap-0.5 mr-2 hover:underline" title="${esc(a.name)}"><i data-lucide="${a.kind === 'fatura' ? 'receipt' : 'image'}" class="w-3.5 h-3.5"></i>${a.kind === 'fatura' ? 'Fatura' : 'Foto'}</a>`).join('') || '<span class="text-zinc-300">—</span>'}</td>
+    <td class="py-2 text-right tabular-nums font-semibold">${EUR.format(h.cost || 0)}</td></tr>`).join('') || '<tr><td colspan="6" class="py-6 text-center text-xs text-zinc-400">Ainda sem reparações concluídas.</td></tr>';
+  icons();
+}
+
+/* ---------- ações ---------- */
+const num = (s) => parseFloat(String(s || '').replace(',', '.'));
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('button, [data-pick]');
+  if (!t) return;
+  const d = t.dataset;
+  if (d.phase && !t.disabled) send({ type: 'phase', vid: d.vid, phase: d.phase });
+  if (d.finish && !t.disabled) {
+    const v = snap.vehicles.find(x => x.id === d.finish);
+    $('finishTitle').textContent = `Concluir reparação — ${v.plate}`;
+    const base = v.workshop.invoice && v.workshop.invoice.amount ? v.workshop.invoice.amount : v.workshop.cost;
+    $('finishCost').value = base != null ? Number(base).toFixed(2).replace('.', ',') : '';
+    $('finishWarn').classList.toggle('hidden', !(v.workshop.type === 'Externa' && !v.workshop.invoice));
+    $('finishNote').value = '';
+    $('finishForm').dataset.vid = v.id;
+    $('finishModal').classList.remove('hidden');
+  }
+  if (d.closeFinish !== undefined) $('finishModal').classList.add('hidden');
+  if (d.invoiceOpen) document.querySelector(`[data-invoice="${d.invoiceOpen}"]`).classList.toggle('hidden');
+  if (d.detach) { e.preventDefault(); removeAttachment(d.vid, d.detach); }
+  if (d.pick) pickWorkshop(d.pick);
+  if (t.id === 'logoutBtn') logout();
+});
+document.addEventListener('submit', (e) => {
+  const f = e.target, d = f.dataset;
+  if (d.estimate) { e.preventDefault(); send({ type: 'estimate', vid: d.estimate, hours: num(f.hours.value) }); f.reset(); }
+  if (d.note) { e.preventDefault(); send({ type: 'note', vid: d.note, text: f.text.value }); f.reset(); }
+  if (d.quote) { e.preventDefault(); send({ type: 'quote', vid: d.quote, amount: num(f.amount.value), description: f.description.value }); f.reset(); }
+  if (d.invoice) {
+    e.preventDefault();
+    const file = f.file.files[0]; if (!file) return;
+    const amount = num(f.amount.value);
+    busy(d.invoice, true);
+    uploadFile(d.invoice, 'fatura', file, { number: f.number.value.trim(), amount: amount > 0 ? amount : undefined })
+      .then(() => toast('ok', 'Fatura enviada', 'A central foi avisada.'))
+      .catch(err => toast('warn', 'Não foi possível enviar a fatura', err.message))
+      .finally(() => busy(d.invoice, false));
+  }
+});
+$('finishForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  send({ type: 'finish', vid: $('finishForm').dataset.vid, cost: num($('finishCost').value), note: $('finishNote').value });
+  $('finishModal').classList.add('hidden');
+});
+
+function onIncoming(m) {
+  if (m.type === 'init') { me = m.user; return; }
+  if (m.type === 'state') onState(m);
+  if (m.type === 'error') toast('warn', 'Não foi possível', m.error);
+  if (m.type === 'notify') toast('info', m.title, m.text);
+}
+
+/* ---------- modo servidor ---------- */
+async function api(path, opts = {}) {
+  const r = await fetch(path, { credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, ...opts });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw Object.assign(new Error(body.error || 'Erro'), { status: r.status });
+  return body;
+}
+function connect() {
+  ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws?role=oficina`);
+  ws.onopen = () => { wsRetry = 0; $('connDot').className = 'w-1.5 h-1.5 rounded-full bg-emerald-500'; };
+  ws.onmessage = (e) => { try { onIncoming(JSON.parse(e.data)); } catch (err) { console.error(err); } };
+  ws.onclose = async () => {
+    $('connDot').className = 'w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse';
+    if (leaving) return;
+    try { await api('/api/me?role=oficina'); } catch (err) { if (err.status === 401) { snap = null; return show('screen-login'); } }
+    setTimeout(connect, Math.min(10000, 1000 * 2 ** wsRetry++));
+  };
+}
+$('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('loginError').classList.add('hidden'); $('loginBtn').disabled = true;
+  try {
+    const r = await api('/api/login', { method: 'POST', body: JSON.stringify({ role: 'oficina', email: $('loginEmail').value, password: $('loginPass').value }) });
+    me = r.user; $('loginPass').value = ''; connect();
+  } catch (err) { $('loginError').textContent = err.message; $('loginError').classList.remove('hidden'); }
+  finally { $('loginBtn').disabled = false; }
+});
+async function logout() {
+  if (mode === 'demo') { store.set('frota-oficina', ''); wid = null; snap = null; show('screen-pick'); return; }
+  leaving = true;
+  try { await api('/api/logout', { method: 'POST', body: JSON.stringify({ role: 'oficina' }) }); } catch (e) { /* ignorar */ }
+  location.reload();
+}
+
+/* ---------- modo demo ---------- */
+let demoStates = null;
+function pickWorkshop(id) { wid = id; store.set('frota-oficina', id); lastSig = ''; snap = null; freshHello = true; helloDemo(); }
+if (bus) bus.onmessage = (e) => {
+  if (mode !== 'demo') return;
+  const m = e.data;
+  if (!m) return;
+  if (m.type === 'oficinaState') {
+    demoStates = m;
+    if (!wid) renderPick();
+    else if (m.states[wid]) onState(withCachedUrls(m.states[wid]));
+  }
+  if (m.type === 'oficinaResult' && m.workshopId === wid && m.error) toast('warn', 'Não foi possível', m.error);
+  if (m.type === 'oficinaNotify' && m.workshopId === wid) toast('info', m.title, m.text);
+};
+// a central só manda cada ficheiro uma vez; os seguintes chegam sem url e usam a cópia guardada aqui
+const urlCache = {};
+function withCachedUrls(s) {
+  const fill = (a) => { if (a.url) urlCache[a.id] = a.url; else a.url = urlCache[a.id] || ''; };
+  s.vehicles.forEach(v => (v.workshop.attachments || []).forEach(fill));
+  s.history.forEach(h => (h.attachments || []).forEach(fill));
+  return s;
+}
+let freshHello = true;
+function helloDemo() { if (wid) { bcPost({ type: 'oficinaHello', workshopId: wid, fresh: freshHello }); freshHello = false; } }
+function renderPick() {
+  $('pickWait').classList.add('hidden'); $('pickHelp').classList.add('hidden');
+  $('pickList').innerHTML = C.WORKSHOPS.map(w => {
+    const n = demoStates && demoStates.counts ? demoStates.counts[w.id] || 0 : 0;
+    return `<li><button data-pick="${w.id}" class="w-full text-left px-3 py-2.5 rounded-xl border border-zinc-200 hover:border-zinc-400 flex items-center justify-between gap-2">
+      <span><span class="block text-sm font-bold">${esc(w.name)}</span><span class="block text-[11px] text-zinc-500">Oficina ${w.type.toLowerCase()}</span></span>
+      ${n ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-900 text-white">${n} camião${n > 1 ? 'ões' : ''}</span>` : ''}</button></li>`;
+  }).join('');
+}
+setInterval(() => {
+  if (mode === 'demo') {
+    helloDemo();
+    if (!demoStates && performance.now() > 3500) { $('pickWait').classList.add('hidden'); $('pickHelp').classList.remove('hidden'); }
+  }
+}, 2000);
+
+/* ---------- arranque ---------- */
+icons();
+(async function boot() {
+  let health = null;
+  if (location.protocol.startsWith('http')) {
+    try { const r = await fetch('/api/health', { cache: 'no-store' }); if (r.ok) health = await r.json(); } catch (e) { /* sem servidor */ }
+  }
+  if (health && health.app === 'gestao-frota') {
+    mode = 'servidor';
+    try { const r = await api('/api/me?role=oficina'); me = r.user; connect(); }
+    catch (e) { show('screen-login'); setTimeout(() => $('loginEmail').focus(), 50); }
+  } else {
+    mode = 'demo';
+    wid = new URLSearchParams(location.search).get('o') || store.get('frota-oficina') || null;
+    show('screen-pick');
+    helloDemo();
+  }
+})();
+</script>
+</body>
+</html>

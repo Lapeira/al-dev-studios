@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestão de Frota | Projeto de Alexandre Sousa</title>
+  <meta name="description" content="Sistema de gestão de frotas para empresas de transporte: mapa em tempo real, tempos de condução, desgaste de peças, oficinas, alertas e mensagens com motoristas." />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fontes Google -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Ícones Lucide -->
+  <script src="https://unpkg.com/lucide@1.59.0/dist/umd/lucide.min.js"></script>
+
+  <!-- Leaflet (mapa) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .leaflet-container { font-family: inherit; background: #e4e4e7; }
+    .truck-marker { background: none; border: none; }
+    .truck-pin {
+      display: flex; align-items: center; gap: 4px;
+      padding: 3px 7px 3px 3px; border-radius: 999px;
+      background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.25);
+      font-size: 10px; font-weight: 800; color: #18181b; white-space: nowrap;
+      border: 2px solid transparent;
+    }
+    .truck-pin.sel { border-color: #18181b; transform: scale(1.12); }
+    .truck-dot { width: 20px; height: 20px; border-radius: 999px; display: flex; align-items: center; justify-content: center; color: #fff; }
+    .scroll-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+    .scroll-thin::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 6px; }
+    .toast-in { animation: toastIn .25s ease-out; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .tab-btn[aria-selected="true"] { background: #18181b; color: #fff; }
+    /* gráficos: cores por papel (paleta validada para daltonismo, ordem fixa) */
+    .viz-root {
+      --surface: #ffffff; --grid: #ececea; --hover: rgba(24,24,27,.04);
+      --ink: #18181b; --ink-2: #52514e; --muted: #8a8984;
+      --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --series-4: #eda100; --series-5: #e87ba4;
+    }
+    .viz-axis { font-size: 10px; fill: var(--muted); font-weight: 600; }
+    .viz-label { font-size: 11px; fill: var(--ink); font-weight: 700; }
+    .viz-value, .viz-axis { paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+    .viz-value { font-size: 11px; fill: var(--ink-2); font-weight: 600; }
+    .viz-tip { position: absolute; display: none; pointer-events: none; z-index: 20; min-width: 170px;
+      background: #fff; border: 1px solid #e4e4e7; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      padding: 8px 10px; font-size: 11px; color: #18181b; }
+    @media print {
+      @page { size: A4 landscape; margin: 12mm; }
+      body { background: #fff !important; }
+      #demoBar, header, #toasts, #loginOverlay, #userModal, #expenseModal, .no-print { display: none !important; }
+      main > section { display: none !important; }
+      main > #view-relatorios { display: block !important; padding: 0 !important; max-width: none !important; }
+      #view-relatorios .shadow-sm { box-shadow: none !important; }
+      .print-avoid { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body class="bg-[#f4f4f5] text-zinc-900">
+
+  <!-- BARRA DE DEMO (escondida quando a página aparece como miniatura no portfolio) -->
+  <div id="demoBar" class="bg-zinc-900 text-zinc-300 text-[11px] sm:text-xs">
+    <div class="px-4 sm:px-6 py-2 flex items-center justify-between gap-3">
+      <a href="../index.html#projetos" class="inline-flex items-center gap-1.5 font-semibold text-white hover:underline">
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+        Voltar ao portfolio
+      </a>
+      <span>Dados simulados · Projeto pessoal de <strong class="text-white">Alexandre Sousa</strong></span>
+    </div>
+  </div>
+  <script>if (window.self !== window.top) document.getElementById('demoBar').remove();</script>
+
+  <!-- CABEÇALHO -->
+  <header class="bg-white border-b border-zinc-200 relative lg:sticky lg:top-0 z-[1100]">
+    <div class="px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-zinc-900 text-white flex items-center justify-center">
+          <i data-lucide="truck" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="text-sm font-bold text-zinc-900 leading-tight">Transportes Norte Sul</h1>
+          <p class="text-[11px] text-zinc-400 font-medium">Centro de controlo de frota · <span id="modeBadge">a ligar…</span></p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+        <a href="motorista.html" target="_blank" rel="noopener" class="flex items-center gap-1.5 text-xs font-semibold text-white bg-zinc-900 hover:bg-zinc-700 rounded-lg px-2.5 py-1.5" title="Abrir a app do motorista noutro separador">
+          <i data-lucide="smartphone" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">App do motorista</span>
+        </a>
+        <div class="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 bg-zinc-100 rounded-lg px-2.5 py-1.5">
+          <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+          <span id="simClock">--:--</span>
+        </div>
+        <label class="flex items-center gap-1.5 text-xs font-semibold text-zinc-600">
+          <span class="hidden sm:inline">Velocidade</span>
+          <select id="simSpeed" class="bg-zinc-100 rounded-lg px-2 py-1.5 text-xs font-semibold focus:outline-none" title="Velocidade da simulação">
+            <option value="1">1× (tempo real)</option>
+            <option value="60" selected>60×</option>
+            <option value="300">300×</option>
+          </select>
+        </label>
+        <button id="pauseBtn" class="p-2 rounded-lg bg-zinc-100 hover:bg-zinc-200" title="Pausar simulação" aria-label="Pausar simulação">
+          <i data-lucide="pause" class="w-4 h-4"></i>
+        </button>
+        <div id="userBox" class="hidden flex items-center gap-1.5 text-xs font-semibold text-zinc-600 bg-zinc-100 rounded-lg pl-2.5 pr-1 py-1">
+          <i data-lucide="user" class="w-3.5 h-3.5"></i><span id="userName" class="hidden sm:inline">—</span>
+          <button id="myAccountBtn" class="hidden ml-1 p-1 rounded-md hover:bg-zinc-200" title="A minha conta (mudar palavra-passe)" aria-label="A minha conta"><i data-lucide="key-round" class="w-3.5 h-3.5"></i></button>
+          <button id="logoutBtn" class="ml-1 p-1 rounded-md hover:bg-zinc-200" title="Terminar sessão" aria-label="Terminar sessão"><i data-lucide="log-out" class="w-3.5 h-3.5"></i></button>
+        </div>
+        <div class="relative">
+          <button id="bellBtn" class="relative p-2 rounded-lg bg-zinc-100 hover:bg-zinc-200" aria-label="Notificações">
+            <i data-lucide="bell" class="w-4 h-4"></i>
+            <span id="bellCount" class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center">0</span>
+          </button>
+          <div id="bellPanel" class="hidden absolute right-0 mt-2 w-[min(360px,calc(100vw-2rem))] bg-white rounded-2xl border border-zinc-200 shadow-xl overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-zinc-100">
+              <span class="text-sm font-bold">Notificações</span>
+              <div class="flex items-center gap-3">
+                <button id="browserNotifBtn" class="text-[11px] font-semibold text-zinc-500 hover:text-zinc-900">Ativar no browser</button>
+                <button id="markAllRead" class="text-[11px] font-semibold text-zinc-500 hover:text-zinc-900">Marcar lidas</button>
+              </div>
+            </div>
+            <ul id="bellList" class="max-h-96 overflow-y-auto scroll-thin divide-y divide-zinc-100"></ul>
+            <button data-goto="alertas" class="w-full text-center text-xs font-semibold py-2.5 bg-zinc-50 hover:bg-zinc-100">Ver todos os alertas</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="px-4 sm:px-6 pb-3 grid grid-cols-3 sm:grid-cols-6 gap-2" id="kpis"></div>
+
+    <!-- SEPARADORES -->
+    <nav class="px-4 sm:px-6 pb-3 flex gap-1.5 overflow-x-auto scroll-thin" role="tablist">
+      <button class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 whitespace-nowrap inline-flex items-center gap-1.5" data-tab="mapa" role="tab" aria-selected="true"><i data-lucide="map" class="w-3.5 h-3.5"></i> Mapa ao vivo</button>
+      <button class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 whitespace-nowrap inline-flex items-center gap-1.5" data-tab="oficinas" role="tab" aria-selected="false"><i data-lucide="wrench" class="w-3.5 h-3.5"></i> Oficinas & manutenção</button>
+      <button class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 whitespace-nowrap inline-flex items-center gap-1.5" data-tab="alertas" role="tab" aria-selected="false"><i data-lucide="triangle-alert" class="w-3.5 h-3.5"></i> Alertas <span id="alertTabCount" class="text-[10px] px-1.5 rounded-full bg-red-600 text-white hidden"></span></button>
+      <button class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 whitespace-nowrap inline-flex items-center gap-1.5" data-tab="mensagens" role="tab" aria-selected="false"><i data-lucide="message-square" class="w-3.5 h-3.5"></i> Mensagens <span id="msgTabCount" class="text-[10px] px-1.5 rounded-full bg-blue-600 text-white hidden"></span></button>
+      <button class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 whitespace-nowrap inline-flex items-center gap-1.5" data-tab="relatorios" role="tab" aria-selected="false"><i data-lucide="chart-column" class="w-3.5 h-3.5"></i> Custos e relatórios</button>
+      <button id="tabUsers" class="hidden tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 whitespace-nowrap inline-flex items-center gap-1.5" data-tab="utilizadores" role="tab" aria-selected="false"><i data-lucide="users" class="w-3.5 h-3.5"></i> Utilizadores</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ============ VISTA: MAPA ============ -->
+    <section id="view-mapa" class="lg:h-[calc(100vh-190px)] lg:min-h-[560px] grid grid-cols-1 lg:grid-cols-[300px_1fr_380px]">
+      <!-- Lista de veículos -->
+      <aside class="bg-white border-r border-zinc-200 flex flex-col min-h-0 order-2 lg:order-1">
+        <div class="p-3 border-b border-zinc-100 space-y-2">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input id="searchInput" type="search" placeholder="Matrícula, motorista ou carga…" class="w-full pl-9 pr-3 py-2 text-sm bg-zinc-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-300" />
+          </div>
+          <div id="statusFilters" class="flex flex-wrap gap-1"></div>
+        </div>
+        <ul id="vehicleList" class="flex-1 overflow-y-auto scroll-thin divide-y divide-zinc-100 max-h-80 lg:max-h-none"></ul>
+      </aside>
+
+      <!-- Mapa -->
+      <div class="relative order-1 lg:order-2 h-[55vh] lg:h-auto">
+        <div id="map" class="absolute inset-0"></div>
+        <div class="hidden sm:block absolute bottom-3 left-3 z-[500] bg-white/95 rounded-xl shadow px-3 py-2 text-[11px] font-semibold text-zinc-600 space-y-1" id="legend"></div>
+      </div>
+
+      <!-- Detalhe do veículo -->
+      <aside id="detail" class="bg-white border-l border-zinc-200 overflow-y-auto scroll-thin order-3 min-h-0"></aside>
+    </section>
+
+    <!-- ============ VISTA: OFICINAS ============ -->
+    <section id="view-oficinas" class="hidden px-4 sm:px-6 py-6 space-y-6 max-w-7xl mx-auto">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3" id="wsSummary"></div>
+      <div>
+        <h2 class="font-extrabold text-base mb-1">Veículos em oficina</h2>
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-4">
+          <p class="text-xs text-zinc-400">Estado da reparação, tempo parado e previsão de saída — oficinas próprias e externas. As oficinas com acesso atualizam tudo pelo portal; os orçamentos das parceiras precisam da tua aprovação.</p>
+          <a href="oficina.html" target="_blank" rel="noopener" class="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 inline-flex items-center gap-1.5"><i data-lucide="external-link" class="w-3.5 h-3.5"></i>Portal das oficinas</a>
+        </div>
+        <div id="wsCards" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      </div>
+      <div class="bg-white rounded-2xl border border-zinc-200/80 shadow-sm p-5">
+        <h2 class="font-extrabold text-base mb-1">Manutenção preventiva recomendada</h2>
+        <p class="text-xs text-zinc-400 mb-4">Peças acima de 80% do tempo de vida estimado (calculado com km, peso da carga e tipo de terreno).</p>
+        <div class="overflow-x-auto scroll-thin">
+          <table class="w-full text-sm">
+            <thead class="text-[11px] uppercase tracking-wide text-zinc-400 text-left">
+              <tr><th class="py-2 pr-4">Veículo</th><th class="py-2 pr-4">Peça</th><th class="py-2 pr-4">Desgaste</th><th class="py-2 pr-4">Restante estimado</th><th class="py-2"></th></tr>
+            </thead>
+            <tbody id="maintTable" class="divide-y divide-zinc-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ VISTA: ALERTAS ============ -->
+    <section id="view-alertas" class="hidden px-4 sm:px-6 py-6 max-w-7xl mx-auto">
+      <div class="bg-white rounded-2xl border border-zinc-200/80 shadow-sm">
+        <div class="p-4 border-b border-zinc-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <h2 class="font-extrabold text-base">Centro de alertas</h2>
+            <p class="text-xs text-zinc-400">Peças, condução, trânsito, carga, documentos e oficina.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <select id="alertSevFilter" class="bg-zinc-100 rounded-lg px-2.5 py-1.5 text-xs font-semibold">
+              <option value="">Todas as gravidades</option>
+              <option value="critico">Crítico</option>
+              <option value="aviso">Aviso</option>
+              <option value="info">Informação</option>
+            </select>
+            <select id="alertCatFilter" class="bg-zinc-100 rounded-lg px-2.5 py-1.5 text-xs font-semibold">
+              <option value="">Todas as categorias</option>
+            </select>
+            <label class="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-600 bg-zinc-100 rounded-lg px-2.5 py-1.5">
+              <input type="checkbox" id="alertShowResolved" /> Mostrar resolvidos
+            </label>
+          </div>
+        </div>
+        <ul id="alertList" class="divide-y divide-zinc-100"></ul>
+      </div>
+    </section>
+
+    <!-- ============ VISTA: MENSAGENS ============ -->
+    <section id="view-mensagens" class="hidden px-4 sm:px-6 py-6 max-w-7xl mx-auto">
+      <div class="bg-white rounded-2xl border border-zinc-200/80 shadow-sm grid grid-cols-1 md:grid-cols-[280px_1fr] h-[calc(100vh-240px)] min-h-[480px] overflow-hidden">
+        <div class="border-r border-zinc-100 flex flex-col min-h-0">
+          <div class="p-3 border-b border-zinc-100 flex items-center justify-between gap-2">
+            <span class="text-sm font-bold">Motoristas</span>
+            <button id="broadcastBtn" class="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 inline-flex items-center gap-1"><i data-lucide="megaphone" class="w-3 h-3"></i> Mensagem a todos</button>
+          </div>
+          <ul id="threadList" class="flex-1 overflow-y-auto scroll-thin divide-y divide-zinc-100 max-h-48 md:max-h-none"></ul>
+        </div>
+        <div class="flex flex-col min-h-0">
+          <div id="chatHeader" class="p-3 border-b border-zinc-100"></div>
+          <div id="chatBody" class="flex-1 overflow-y-auto scroll-thin p-4 space-y-2 bg-zinc-50"></div>
+          <div class="p-3 border-t border-zinc-100 space-y-2">
+            <div id="quickReplies" class="flex flex-wrap gap-1.5"></div>
+            <form id="chatForm" class="flex gap-2">
+              <input id="chatInput" type="text" autocomplete="off" placeholder="Escrever mensagem…" class="flex-1 px-3 py-2 text-sm bg-zinc-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-300" />
+              <button class="px-4 py-2 rounded-lg bg-zinc-900 text-white text-sm font-semibold inline-flex items-center gap-1.5"><i data-lucide="send" class="w-4 h-4"></i><span class="hidden sm:inline">Enviar</span></button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ============ VISTA: CUSTOS E RELATÓRIOS ============ -->
+    <section id="view-relatorios" class="viz-root hidden px-4 sm:px-6 py-6 max-w-7xl mx-auto space-y-4">
+      <div class="hidden print:block">
+        <h1 class="text-xl font-black">Transportes Norte Sul — Custos e relatórios</h1>
+        <p id="printPeriod" class="text-sm text-zinc-500"></p>
+      </div>
+      <div class="no-print bg-white rounded-2xl border border-zinc-200/80 shadow-sm p-3 flex flex-col lg:flex-row gap-3 lg:items-center justify-between">
+        <div class="flex flex-wrap items-center gap-2">
+          <div id="repPresets" class="flex flex-wrap gap-1"></div>
+          <label class="text-[11px] font-semibold text-zinc-500 inline-flex items-center gap-1">de <input id="repFromInput" type="date" class="bg-zinc-100 rounded-lg px-2 py-1 text-xs font-semibold text-zinc-800" /></label>
+          <label class="text-[11px] font-semibold text-zinc-500 inline-flex items-center gap-1">até <input id="repToInput" type="date" class="bg-zinc-100 rounded-lg px-2 py-1 text-xs font-semibold text-zinc-800" /></label>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button id="expenseBtn" class="text-xs font-semibold px-3 py-2 rounded-lg bg-zinc-900 text-white inline-flex items-center gap-1.5"><i data-lucide="receipt" class="w-3.5 h-3.5"></i>Registar despesa</button>
+          <button id="csvBtn" class="text-xs font-semibold px-3 py-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 inline-flex items-center gap-1.5"><i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>Exportar CSV</button>
+          <button id="printBtn" class="text-xs font-semibold px-3 py-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 inline-flex items-center gap-1.5"><i data-lucide="printer" class="w-3.5 h-3.5"></i>Imprimir / PDF</button>
+        </div>
+      </div>
+
+      <div id="repKpis" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3"></div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <div class="print-avoid lg:col-span-3 bg-white rounded-2xl border border-zinc-200/80 shadow-sm p-5">
+          <h2 class="font-extrabold text-base">Custos e receita por dia</h2>
+          <p class="text-xs text-zinc-400 mb-3">Colunas: custos por categoria. Linha: receita dos fretes entregues. Passa o rato para ver os valores.</p>
+          <div id="repLegend" class="flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-semibold text-zinc-600 mb-2"></div>
+          <div id="chartDaily" class="relative"></div>
+        </div>
+        <div class="print-avoid lg:col-span-2 bg-white rounded-2xl border border-zinc-200/80 shadow-sm p-5">
+          <h2 class="font-extrabold text-base">Custo por km, por camião</h2>
+          <p class="text-xs text-zinc-400 mb-3">Todos os custos a dividir pelos km do período. A linha é a média da frota.</p>
+          <div id="chartCpk" class="relative"></div>
+        </div>
+      </div>
+
+      <div class="print-avoid bg-white rounded-2xl border border-zinc-200/80 shadow-sm p-5">
+        <h2 class="font-extrabold text-base">Por camião</h2>
+        <p class="text-xs text-zinc-400 mb-3">Carrega no nome de uma coluna para ordenar.</p>
+        <div class="overflow-x-auto scroll-thin"><table id="repVehTable" class="w-full text-sm min-w-[900px]"></table></div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="print-avoid bg-white rounded-2xl border border-zinc-200/80 shadow-sm p-5">
+          <h2 class="font-extrabold text-base">Por motorista</h2>
+          <p id="repDrvNote" class="text-xs text-zinc-400 mb-3"></p>
+          <div class="overflow-x-auto scroll-thin"><table id="repDrvTable" class="w-full text-sm"></table></div>
+        </div>
+        <div class="print-avoid bg-white rounded-2xl border border-zinc-200/80 shadow-sm p-5">
+          <h2 class="font-extrabold text-base">Por país</h2>
+          <p class="text-xs text-zinc-400 mb-3">Km feitos em cada país, com o gasóleo e as portagens desse país.</p>
+          <div class="overflow-x-auto scroll-thin"><table id="repCtryTable" class="w-full text-sm"></table></div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="print-avoid bg-white rounded-2xl border border-zinc-200/80 shadow-sm p-5">
+          <div class="flex items-baseline justify-between gap-2"><h2 class="font-extrabold text-base">Despesas registadas</h2><span id="repExpTotal" class="text-[11px] text-zinc-500 font-semibold"></span></div>
+          <p class="text-xs text-zinc-400 mb-2">Oficina, pneus, multas, lavagens… As reparações entram sozinhas quando o camião sai da oficina.</p>
+          <ul id="repExpList" class="divide-y divide-zinc-100 max-h-96 overflow-y-auto scroll-thin"></ul>
+        </div>
+        <div class="print-avoid bg-white rounded-2xl border border-zinc-200/80 shadow-sm p-5">
+          <h2 class="font-extrabold text-base">Tarifas</h2>
+          <p class="text-xs text-zinc-400 mb-2">Preço do gasóleo e das portagens para camião por país, custo do motorista e preço do frete.</p>
+          <div id="repTariffs"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ VISTA: UTILIZADORES ============ -->
+    <section id="view-utilizadores" class="hidden px-4 sm:px-6 py-6 max-w-7xl mx-auto space-y-4">
+      <div class="bg-white rounded-2xl border border-zinc-200/80 shadow-sm">
+        <div class="p-4 border-b border-zinc-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <h2 class="font-extrabold text-base">Utilizadores</h2>
+            <p class="text-xs text-zinc-400">Gestores entram com email e palavra-passe; motoristas com o PIN na app, no camião que lhes está atribuído; oficinas no portal, só com os camiões delas.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button id="newDriverBtn" class="text-xs font-semibold px-3 py-2 rounded-lg bg-zinc-900 text-white inline-flex items-center gap-1.5"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i>Novo motorista</button>
+            <button id="newManagerBtn" class="text-xs font-semibold px-3 py-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 inline-flex items-center gap-1.5"><i data-lucide="shield-plus" class="w-3.5 h-3.5"></i>Novo gestor</button>
+            <button id="newWorkshopUserBtn" class="text-xs font-semibold px-3 py-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 inline-flex items-center gap-1.5"><i data-lucide="wrench" class="w-3.5 h-3.5"></i>Nova oficina</button>
+          </div>
+        </div>
+        <div class="p-4 flex flex-col sm:flex-row gap-2 sm:items-center justify-between border-b border-zinc-100">
+          <div id="usersFilters" class="flex flex-wrap gap-1"></div>
+          <div class="relative sm:w-64">
+            <i data-lucide="search" class="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input id="usersSearch" type="search" placeholder="Nome, email, telefone ou matrícula…" class="w-full pl-9 pr-3 py-2 text-sm bg-zinc-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-300" />
+          </div>
+        </div>
+        <div id="usersWarn" class="hidden mx-4 mt-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-800 text-xs p-3 flex gap-2 items-start"></div>
+        <div class="overflow-x-auto scroll-thin px-4 pb-2">
+          <table class="w-full text-sm min-w-[720px]">
+            <thead class="text-[11px] uppercase tracking-wide text-zinc-400 text-left">
+              <tr><th class="py-3 pr-4">Nome</th><th class="py-3 pr-4">Tipo</th><th class="py-3 pr-4">Camião</th><th class="py-3 pr-4">Estado</th><th class="py-3 pr-4">Último acesso</th><th class="py-3"></th></tr>
+            </thead>
+            <tbody id="usersTable" class="divide-y divide-zinc-100"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl border border-zinc-200/80 shadow-sm p-5">
+        <h2 class="font-extrabold text-base mb-1">Registo de alterações</h2>
+        <p class="text-xs text-zinc-400 mb-3">Quem criou, alterou ou apagou contas, e quando.</p>
+        <ul id="auditList" class="divide-y divide-zinc-100"></ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- JANELA: registar despesa -->
+  <div id="expenseModal" class="hidden fixed inset-0 z-[1400] bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <form id="expenseForm" class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-5 space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-extrabold">Registar despesa</h3>
+        <button type="button" id="expClose" class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400" aria-label="Fechar"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <label class="block"><span class="text-xs font-semibold text-zinc-600">Camião</span><select id="expVehicle" class="mt-1 w-full px-3 py-2.5 text-sm bg-zinc-100 rounded-lg"></select></label>
+      <div class="grid grid-cols-2 gap-3">
+        <label class="block"><span class="text-xs font-semibold text-zinc-600">Tipo</span><select id="expType" class="mt-1 w-full px-3 py-2.5 text-sm bg-zinc-100 rounded-lg"></select></label>
+        <label class="block"><span class="text-xs font-semibold text-zinc-600">Valor (€)</span><input id="expAmount" inputmode="decimal" required placeholder="0,00" class="mt-1 w-full px-3 py-2.5 text-sm bg-zinc-100 rounded-lg tabular-nums" /></label>
+      </div>
+      <label class="block"><span class="text-xs font-semibold text-zinc-600">Descrição</span><input id="expDesc" maxlength="140" placeholder="Ex.: lavagem em Vilar Formoso" class="mt-1 w-full px-3 py-2.5 text-sm bg-zinc-100 rounded-lg" /></label>
+      <label class="block"><span class="text-xs font-semibold text-zinc-600">Fatura ou recibo (opcional · PDF ou foto)</span>
+        <input id="expFile" type="file" accept="application/pdf,image/*" class="mt-1 block w-full text-xs file:mr-2 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-zinc-200 file:text-zinc-800 file:text-xs file:font-bold" /></label>
+      <p id="expError" class="hidden text-xs font-semibold text-red-600"></p>
+      <button id="expSubmit" class="w-full py-2.5 rounded-lg bg-zinc-900 text-white text-sm font-bold disabled:opacity-50">Registar</button>
+    </form>
+  </div>
+
+  <!-- JANELA: criar / editar utilizador, nova credencial, a minha conta -->
+  <div id="userModal" class="hidden fixed inset-0 z-[1400] bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 id="userModalTitle" class="text-base font-extrabold">—</h3>
+        <button id="userModalClose" class="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400" aria-label="Fechar"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form id="userModalForm" class="space-y-3">
+        <div id="userModalBody" class="space-y-3"></div>
+        <p id="userModalError" class="hidden text-xs font-semibold text-red-600"></p>
+        <button id="userModalSubmit" class="w-full py-2.5 rounded-lg bg-zinc-900 text-white text-sm font-bold disabled:opacity-50">Guardar</button>
+      </form>
+      <div id="userModalDone" class="hidden"></div>
+    </div>
+  </div>
+
+  <!-- LOGIN DO GESTOR (só com servidor) -->
+  <div id="loginOverlay" class="hidden fixed inset-0 z-[1500] bg-zinc-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <form id="loginForm" class="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-6 space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-zinc-900 text-white flex items-center justify-center"><i data-lucide="truck" class="w-5 h-5"></i></div>
+        <div><h2 class="text-base font-extrabold">Transportes Norte Sul</h2><p class="text-xs text-zinc-500">Entrar no centro de controlo</p></div>
+      </div>
+      <label class="block"><span class="text-xs font-semibold text-zinc-600">Email</span>
+        <input id="loginEmail" type="email" required autocomplete="username" class="mt-1 w-full px-3 py-2.5 text-sm bg-zinc-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-300" /></label>
+      <label class="block"><span class="text-xs font-semibold text-zinc-600">Palavra-passe</span>
+        <input id="loginPass" type="password" required autocomplete="current-password" class="mt-1 w-full px-3 py-2.5 text-sm bg-zinc-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-300" /></label>
+      <p id="loginError" class="hidden text-xs font-semibold text-red-600"></p>
+      <button id="loginBtn" class="w-full py-2.5 rounded-lg bg-zinc-900 text-white text-sm font-bold disabled:opacity-50">Entrar</button>
+      <p id="loginHint" class="hidden text-[11px] text-zinc-400 text-center">Conta de teste no README (criada na primeira vez que o servidor arranca).</p>
+    </form>
+  </div>
+
+  <!-- Toasts -->
+  <div id="toasts" class="fixed bottom-4 right-4 z-[1200] space-y-2 w-[min(340px,calc(100vw-2rem))]"></div>
+
+<script src="js/frota-core.js"></script>
+<script src="js/painel.js"></script>
+<script src="js/utilizadores.js"></script>
+<script src="js/relatorios.js"></script>
+</body>
+</html>

@@ -12,11 +12,11 @@
     font-family: "Segoe UI", Arial, sans-serif;
     color: #27272a;
     font-size: 9.6pt;
-    line-height: 1.42;
+    line-height: 1.36;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .page { width: 210mm; height: 297mm; padding: 15mm 16mm 13mm; overflow: hidden; }
+  .page { width: 210mm; height: 297mm; padding: 12mm 16mm 11mm; overflow: hidden; }
   a { color: inherit; text-decoration: none; }
 
   header { border-bottom: 2px solid #18181b; padding-bottom: 9pt; margin-bottom: 11pt; }
@@ -27,12 +27,12 @@
   .contacts a { color: #09090b; font-weight: 600; border-bottom: 1px solid #a1a1aa; }
   .sep { color: #a1a1aa; margin: 0 4pt; }
 
-  section { margin-top: 11pt; }
+  section { margin-top: 9pt; }
   h2 {
     font-size: 8.6pt; font-weight: 800; text-transform: uppercase; letter-spacing: 1.1pt;
-    color: #09090b; border-bottom: 1px solid #e4e4e7; padding-bottom: 2.5pt; margin-bottom: 6pt;
+    color: #09090b; border-bottom: 1px solid #e4e4e7; padding-bottom: 2.5pt; margin-bottom: 4.5pt;
   }
-  .entry + .entry { margin-top: 8pt; }
+  .entry + .entry { margin-top: 6pt; }
   .entry-head { display: flex; justify-content: space-between; gap: 10pt; align-items: baseline; }
   .entry-title { font-weight: 700; color: #09090b; font-size: 10pt; }
   .entry-org { color: #3f3f46; }
@@ -67,7 +67,7 @@
   <section>
     <h2>Competências técnicas</h2>
     <dl class="skills">
-      <dt>Back-end</dt><dd>Node.js, Express.js, Python, Flask, APIs REST, autenticação JWT e bcrypt</dd>
+      <dt>Back-end</dt><dd>Node.js, Express.js, Python, Flask, APIs REST, WebSockets, autenticação JWT e bcrypt</dd>
       <dt>Front-end</dt><dd>JavaScript, HTML5, CSS3, Tailwind CSS</dd>
       <dt>Bases de dados</dt><dd>MySQL, SQLite, SQL e modelação relacional</dd>
       <dt>Ferramentas</dt><dd>Git e GitHub, Linux, pywebview (aplicações desktop)</dd>
@@ -104,12 +104,21 @@
     <h2>Projetos</h2>
     <div class="entry">
       <div class="entry-head">
+        <p><span class="entry-title">Gestão de Frota de Transportes</span> <span class="entry-org">— Node.js, Express, WebSockets, SQLite, JavaScript</span> · <a class="link" href="https://lapeira.github.io/al-dev-studios/Frota/">Ver demo</a></p>
+        <span class="entry-date">2026</span>
+      </div>
+      <ul>
+        <li>Painel da central com mapa em tempo real, app do motorista e portal das oficinas, com camiões simulados no servidor.</li>
+        <li>API REST com perfis de acesso e palavras-passe cifradas com scrypt; relatórios de custos com gráficos e exportação CSV.</li>
+      </ul>
+    </div>
+    <div class="entry">
+      <div class="entry-head">
         <p><span class="entry-title">Sistema de Gestão de Atletas</span> <span class="entry-org">— Python, Flask, SQLite, pywebview</span></p>
         <span class="entry-date">Académico · em desenvolvimento</span>
       </div>
       <ul>
-        <li>Aplicação para clubes desportivos: registo de atletas, cálculo automático do escalão pela idade e controlo das mensalidades.</li>
-        <li>Converti a aplicação web em Flask numa aplicação desktop executável com pywebview.</li>
+        <li>Registo de atletas, escalão calculado pela idade e mensalidades; aplicação Flask convertida em desktop com pywebview.</li>
       </ul>
     </div>
     <div class="entry">
@@ -118,8 +127,7 @@
         <span class="entry-date">2026</span>
       </div>
       <ul>
-        <li>Catálogo de loja com pesquisa e filtros em tempo real e encomendas por WhatsApp.</li>
-        <li>Painel de métricas desportivas com indicadores, gráfico e tabela de atletas com pesquisa.</li>
+        <li>Catálogo de loja com pesquisa e encomendas por WhatsApp; painel de métricas desportivas com gráfico.</li>
       </ul>
     </div>
   </section>

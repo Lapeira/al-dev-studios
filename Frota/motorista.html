@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#09090b" />
+  <title>App do Motorista | Transportes Norte Sul</title>
+  <meta name="description" content="App do motorista: viagem, tempos de condução, mensagens com a central, confirmação de entregas, checklist do camião e SOS." />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@1.59.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    .leaflet-container { font-family: inherit; background: #18181b; }
+    .leaflet-control-attribution { font-size: 9px; background: rgba(9,9,11,.7) !important; color: #a1a1aa; }
+    .leaflet-control-attribution a { color: #d4d4d8; }
+    .me-marker { background: none; border: none; }
+    .me-dot { width: 18px; height: 18px; border-radius: 999px; background: #22c55e; border: 3px solid #fff; box-shadow: 0 0 0 6px rgba(34,197,94,.3); }
+    .nav-btn[aria-current="page"] { color: #fff; }
+    .nav-btn[aria-current="page"] .nav-ico { background: #27272a; }
+    .toast-in { animation: toastIn .25s ease-out; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+    .scroll-thin::-webkit-scrollbar { width: 5px; }
+    .scroll-thin::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 6px; }
+    #sigPad { touch-action: none; }
+    .chk-btn[aria-pressed="true"].ok { background: #16a34a; color: #fff; border-color: #16a34a; }
+    .chk-btn[aria-pressed="true"].bad { background: #d97706; color: #fff; border-color: #d97706; }
+  </style>
+</head>
+<body class="bg-black text-zinc-100">
+<div class="max-w-md mx-auto min-h-screen bg-zinc-950 relative flex flex-col sm:border-x sm:border-zinc-800">
+
+  <!-- ============ LIGAÇÃO / ESCOLHA DE MOTORISTA ============ -->
+  <section id="screen-connect" class="flex-1 flex flex-col items-center justify-center p-8 text-center gap-4">
+    <div class="w-14 h-14 rounded-2xl bg-zinc-800 flex items-center justify-center"><i data-lucide="truck" class="w-7 h-7"></i></div>
+    <div>
+      <h1 class="text-lg font-extrabold">App do Motorista</h1>
+      <p class="text-xs text-zinc-400">Transportes Norte Sul</p>
+    </div>
+    <div id="connectMsg" class="text-sm text-zinc-400 flex items-center gap-2"><i data-lucide="loader-circle" class="w-4 h-4 animate-spin"></i>A ligar à central…</div>
+    <div id="connectHelp" class="hidden text-xs text-zinc-400 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 space-y-3 text-left">
+      <p class="font-bold text-zinc-200 text-sm">Sem ligação à central</p>
+      <p>Esta demonstração liga-se ao painel da central aberto <b>no mesmo browser</b>. Abre o painel noutro separador (ou janela ao lado) e esta página liga-se sozinha.</p>
+      <a href="index.html" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white text-zinc-900 font-bold text-sm"><i data-lucide="monitor" class="w-4 h-4"></i>Abrir o painel da central</a>
+      <p class="text-[11px] text-zinc-500">Num sistema real, a app falaria com um servidor pela internet (4G/5G) e não precisaria do painel aberto.</p>
+    </div>
+  </section>
+
+  <section id="screen-login" class="hidden flex-1 p-5 space-y-4">
+    <div class="pt-6">
+      <h1 id="loginTitle" class="text-xl font-extrabold">Bom dia 👋</h1>
+      <p id="loginSub" class="text-sm text-zinc-400">Escolhe quem és para entrar (na versão real seria com o cartão de condutor do tacógrafo).</p>
+    </div>
+    <ul id="driverList" class="space-y-2"></ul>
+    <form id="pinForm" class="hidden sticky bottom-4 bg-zinc-900 border border-zinc-700 rounded-2xl p-4 space-y-3 shadow-2xl">
+      <p class="text-sm">PIN de <b id="pinName">—</b></p>
+      <input id="pinInput" type="password" inputmode="numeric" autocomplete="current-password" maxlength="12" required placeholder="••••" class="w-full px-3.5 py-3 text-lg tracking-[0.4em] text-center bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-500" />
+      <p id="pinError" class="hidden text-xs text-amber-400"></p>
+      <button class="w-full py-3 rounded-xl bg-white text-zinc-900 font-extrabold text-sm">Entrar</button>
+    </form>
+  </section>
+
+  <!-- ============ APP ============ -->
+  <div id="app" class="hidden flex-1 flex flex-col min-h-0">
+    <header class="sticky top-0 z-[1000] bg-zinc-950/95 backdrop-blur border-b border-zinc-800 px-4 py-3 flex items-center justify-between gap-3">
+      <button id="whoBtn" class="flex items-center gap-2.5 min-w-0 text-left" title="Trocar de motorista">
+        <span id="avatar" class="w-9 h-9 rounded-full bg-zinc-800 text-xs font-bold flex items-center justify-center shrink-0">--</span>
+        <span class="min-w-0">
+          <span id="hdrName" class="block text-sm font-bold truncate">—</span>
+          <span class="flex items-center gap-1.5 text-[11px] text-zinc-400"><span id="connDot" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span id="hdrSub">—</span></span>
+        </span>
+      </button>
+      <button id="sosBtn" class="shrink-0 px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-extrabold tracking-wide inline-flex items-center gap-1.5"><i data-lucide="siren" class="w-4 h-4"></i>SOS</button>
+    </header>
+
+    <div id="toasts" class="fixed top-16 inset-x-0 z-[1200] px-3 space-y-2 max-w-md mx-auto pointer-events-none"></div>
+
+    <main class="flex-1 overflow-y-auto scroll-thin pb-24">
+      <!-- VIAGEM -->
+      <section id="view-viagem" class="p-4 space-y-3">
+        <div id="tripTop" class="space-y-3"></div>
+        <div class="rounded-2xl overflow-hidden border border-zinc-800 h-48 relative">
+          <div id="miniMap" class="absolute inset-0"></div>
+        </div>
+        <div id="tripBottom" class="space-y-3"></div>
+      </section>
+
+      <!-- MENSAGENS -->
+      <section id="view-mensagens" class="hidden flex flex-col h-full">
+        <div class="px-4 pt-4 pb-2">
+          <h2 class="text-base font-extrabold">Central</h2>
+          <p class="text-[11px] text-zinc-500">Mensagens com o gestor de tráfego. Não escrevas a conduzir: usa as respostas rápidas parado.</p>
+        </div>
+        <div id="chatList" class="px-4 space-y-2 pb-3"></div>
+        <div class="sticky bottom-[72px] bg-zinc-950 border-t border-zinc-800 p-3 space-y-2">
+          <div id="quickReplies" class="flex gap-1.5 overflow-x-auto scroll-thin pb-1"></div>
+          <form id="chatForm" class="flex gap-2">
+            <input id="chatInput" type="text" autocomplete="off" placeholder="Escrever à central…" class="flex-1 min-w-0 px-3.5 py-3 text-sm bg-zinc-900 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-600" />
+            <button class="px-4 rounded-xl bg-white text-zinc-900 font-bold" aria-label="Enviar"><i data-lucide="send" class="w-4 h-4"></i></button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ENTREGA -->
+      <section id="view-entrega" class="hidden p-4 space-y-3">
+        <div>
+          <h2 class="text-base font-extrabold">Confirmar entrega</h2>
+          <p class="text-[11px] text-zinc-500">Foto da guia (CMR) ou da mercadoria, nome e assinatura de quem recebe.</p>
+        </div>
+        <div id="deliveryInfo"></div>
+        <form id="deliveryForm" class="hidden space-y-3">
+          <label class="block">
+            <span class="text-xs font-semibold text-zinc-400">Recebido por</span>
+            <input id="dlvName" type="text" required maxlength="80" placeholder="Nome de quem recebe" class="mt-1 w-full px-3.5 py-3 text-sm bg-zinc-900 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-600" />
+          </label>
+          <div>
+            <span class="text-xs font-semibold text-zinc-400">Foto da guia / mercadoria</span>
+            <label class="mt-1 flex items-center justify-center gap-2 w-full h-36 rounded-xl border-2 border-dashed border-zinc-700 bg-zinc-900 cursor-pointer overflow-hidden relative" id="photoBox">
+              <span id="photoHint" class="flex flex-col items-center gap-1 text-xs text-zinc-400"><i data-lucide="camera" class="w-6 h-6"></i>Tirar foto</span>
+              <img id="photoPreview" alt="Pré-visualização da foto" class="hidden absolute inset-0 w-full h-full object-cover" />
+              <input id="dlvPhoto" type="file" accept="image/*" capture="environment" class="hidden" />
+            </label>
+          </div>
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-zinc-400">Assinatura</span>
+              <button type="button" id="sigClear" class="text-[11px] font-semibold text-zinc-400 hover:text-white">Limpar</button>
+            </div>
+            <canvas id="sigPad" class="mt-1 w-full h-40 rounded-xl bg-white"></canvas>
+          </div>
+          <label class="block">
+            <span class="text-xs font-semibold text-zinc-400">Observações (opcional)</span>
+            <textarea id="dlvNotes" rows="2" maxlength="300" placeholder="Ex.: 1 palete com a embalagem danificada" class="mt-1 w-full px-3.5 py-3 text-sm bg-zinc-900 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-600"></textarea>
+          </label>
+          <p id="dlvError" class="hidden text-xs text-amber-400"></p>
+          <button class="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-sm inline-flex items-center justify-center gap-2"><i data-lucide="package-check" class="w-5 h-5"></i>Enviar confirmação</button>
+        </form>
+      </section>
+
+      <!-- VEÍCULO -->
+      <section id="view-veiculo" class="hidden p-4 space-y-4">
+        <div id="vehInfo"></div>
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-1">
+            <h2 class="text-sm font-extrabold flex items-center gap-1.5"><i data-lucide="list-checks" class="w-4 h-4"></i>Checklist pré-viagem</h2>
+            <span id="chkLast" class="text-[10px] text-zinc-500"></span>
+          </div>
+          <p class="text-[11px] text-zinc-500 mb-3">Faz a volta ao camião antes de arrancar. Os problemas seguem logo para a central.</p>
+          <form id="chkForm" class="space-y-2"></form>
+        </div>
+        <div id="partsBox"></div>
+      </section>
+    </main>
+
+    <!-- NAVEGAÇÃO -->
+    <nav class="fixed bottom-0 inset-x-0 z-[1000] max-w-md mx-auto bg-zinc-950/95 backdrop-blur border-t border-zinc-800 grid grid-cols-4 pb-[env(safe-area-inset-bottom)]">
+      <button class="nav-btn py-2 flex flex-col items-center gap-0.5 text-zinc-500 text-[10px] font-semibold" data-view="viagem" aria-current="page"><span class="nav-ico px-4 py-1 rounded-full"><i data-lucide="navigation" class="w-5 h-5"></i></span>Viagem</button>
+      <button class="nav-btn py-2 flex flex-col items-center gap-0.5 text-zinc-500 text-[10px] font-semibold relative" data-view="mensagens"><span class="nav-ico px-4 py-1 rounded-full relative"><i data-lucide="message-square" class="w-5 h-5"></i><span id="msgBadge" class="hidden absolute -top-0.5 right-2 min-w-[16px] h-4 px-1 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center">0</span></span>Mensagens</button>
+      <button class="nav-btn py-2 flex flex-col items-center gap-0.5 text-zinc-500 text-[10px] font-semibold" data-view="entrega"><span class="nav-ico px-4 py-1 rounded-full relative"><i data-lucide="package-check" class="w-5 h-5"></i><span id="dlvBadge" class="hidden absolute top-0 right-3 w-2.5 h-2.5 rounded-full bg-blue-500 ring-2 ring-zinc-950"></span></span>Entrega</button>
+      <button class="nav-btn py-2 flex flex-col items-center gap-0.5 text-zinc-500 text-[10px] font-semibold" data-view="veiculo"><span class="nav-ico px-4 py-1 rounded-full"><i data-lucide="truck" class="w-5 h-5"></i></span>Veículo</button>
+    </nav>
+  </div>
+
+  <!-- SOS -->
+  <div id="sosModal" class="hidden fixed inset-0 z-[1300] bg-black/70 flex items-end sm:items-center justify-center">
+    <div class="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-t-3xl sm:rounded-3xl p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-extrabold text-red-400 flex items-center gap-2"><i data-lucide="siren" class="w-5 h-5"></i>Pedir ajuda</h2>
+        <button id="sosClose" class="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400" aria-label="Fechar"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div id="sosForm" class="space-y-3">
+        <p class="text-xs text-zinc-400">A central recebe a tua localização exata. Se houver feridos ou perigo, liga primeiro para o <b class="text-white">112</b>.</p>
+        <div class="grid grid-cols-2 gap-2" id="sosKinds">
+          <button data-kind="avaria" class="sos-kind p-3 rounded-xl border border-zinc-700 text-sm font-bold flex flex-col items-center gap-1.5"><i data-lucide="wrench" class="w-5 h-5"></i>Avaria</button>
+          <button data-kind="acidente" class="sos-kind p-3 rounded-xl border border-zinc-700 text-sm font-bold flex flex-col items-center gap-1.5"><i data-lucide="car-front" class="w-5 h-5"></i>Acidente</button>
+          <button data-kind="saude" class="sos-kind p-3 rounded-xl border border-zinc-700 text-sm font-bold flex flex-col items-center gap-1.5"><i data-lucide="heart-pulse" class="w-5 h-5"></i>Saúde</button>
+          <button data-kind="seguranca" class="sos-kind p-3 rounded-xl border border-zinc-700 text-sm font-bold flex flex-col items-center gap-1.5"><i data-lucide="shield-alert" class="w-5 h-5"></i>Segurança / roubo</button>
+        </div>
+        <textarea id="sosText" rows="2" maxlength="160" placeholder="O que se passa? (opcional)" class="w-full px-3.5 py-3 text-sm bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-600"></textarea>
+        <div class="grid grid-cols-[auto_1fr] gap-2">
+          <a href="tel:112" class="px-4 py-3.5 rounded-xl bg-zinc-800 font-extrabold text-sm inline-flex items-center gap-1.5"><i data-lucide="phone" class="w-4 h-4"></i>112</a>
+          <button id="sosSend" disabled class="py-3.5 rounded-xl bg-red-600 disabled:opacity-40 text-white font-extrabold text-sm">Avisar a central</button>
+        </div>
+      </div>
+      <div id="sosDone" class="hidden text-center space-y-2 py-4">
+        <div class="w-12 h-12 mx-auto rounded-full bg-emerald-600 flex items-center justify-center"><i data-lucide="check" class="w-6 h-6"></i></div>
+        <p class="font-bold">A central foi avisada</p>
+        <p class="text-xs text-zinc-400">Mantém-te em segurança, com o colete e o triângulo colocados. Vão contactar-te em breve.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==========================================================================
+   APP DO MOTORISTA
+   Liga-se ao painel (index.html) pelo BroadcastChannel do browser.
+   Num sistema real seria uma app móvel ligada a um servidor (API + WebSockets).
+   ========================================================================== */
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const icons = () => lucide.createIcons({ nameAttr: 'data-lucide' });
+const fmtHM = (min) => { min = Math.max(0, Math.round(min)); return `${Math.floor(min / 60)}h${String(min % 60).padStart(2, '0')}`; };
+const fmtKm = (km) => `${Math.round(km).toLocaleString('pt-PT')} km`;
+const fmtTime = (d) => new Date(d).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+const fmtDate = (d) => new Date(d).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' });
+const sameDay = (a, b) => new Date(a).toDateString() === new Date(b).toDateString();
+const fmtWhen = (d) => !state || sameDay(d, state.simNow) ? fmtTime(d) : `${fmtDate(d)} ${fmtTime(d)}`;
+
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignorar */ } },
+};
+
+// ---------- Ligação ----------
+// modo 'servidor': WebSocket para o servidor Node.js (entrada com PIN)
+// modo 'demo':     BroadcastChannel para o painel aberto no mesmo browser
+let mode = null;
+const bus = 'BroadcastChannel' in window ? new BroadcastChannel('frota-norte-sul') : null;
+const bcPost = (m) => { if (bus) try { bus.postMessage(m); } catch (e) { /* ignorar */ } };
+let ws = null, wsRetry = 0;
+const post = (m) => {
+  if (mode !== 'servidor') return bcPost(m);
+  if (['hello', 'bye'].includes(m.type) || !ws || ws.readyState !== 1) return;
+  const { vid: _ignorado, ...rest } = m;     // o servidor já sabe quem é o motorista pela sessão
+  ws.send(JSON.stringify(rest));
+};
+let vid = null;
+let state = null, me = null, lastStateAt = 0, thread = [], seenMsgs = 0;
+let view = 'viagem';
+let prev = { ahead: new Set(), msgs: -1, warned: false, pending: false, status: null };
+
+function onIncoming(m) {
+  if (!m) return;
+  if (m.type === 'init') { vid = m.vehicleId; return; }
+  if (m.type === 'state') {
+    state = m; lastStateAt = Date.now();
+    me = vid ? m.vehicles.find(v => v.id === vid) : null;
+    onState();
+  } else if (m.type === 'thread' && m.vid === vid) {
+    onThread(m.messages);
+  } else if (m.type === 'error') {
+    toast('warn', 'Não foi possível enviar', m.error);
+  }
+}
+if (bus) bus.onmessage = (e) => { if (mode === 'demo') onIncoming(e.data); };
+const hello = (sync = false) => { if (mode === 'demo' && vid) bcPost({ type: 'hello', vid, sync }); };
+setInterval(() => { hello(); checkConnection(); }, 2000);
+window.addEventListener('pagehide', () => { if (mode === 'demo' && vid) bcPost({ type: 'bye', vid }); });
+
+function checkConnection() {
+  const dot = $('connDot');
+  if (mode === 'servidor') { dot.className = 'w-1.5 h-1.5 rounded-full ' + (ws && ws.readyState === 1 ? 'bg-emerald-500' : 'bg-red-500 animate-pulse'); return; }
+  const age = Date.now() - lastStateAt;
+  if (!state) {
+    if (mode === 'demo' && performance.now() > 3500) { $('connectMsg').classList.add('hidden'); $('connectHelp').classList.remove('hidden'); }
+    return;
+  }
+  dot.className = 'w-1.5 h-1.5 rounded-full ' + (age < 6000 ? 'bg-emerald-500' : age < 75000 ? 'bg-amber-500' : 'bg-red-500');
+}
+
+// ---------- Modo servidor ----------
+async function api(path, opts = {}) {
+  const r = await fetch(path, { credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, ...opts });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw Object.assign(new Error(body.error || 'Erro'), { status: r.status });
+  return body;
+}
+let leaving = false;
+function connectServer() {
+  ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws?role=motorista`);
+  ws.onopen = () => { wsRetry = 0; checkConnection(); };
+  ws.onmessage = (e) => { try { onIncoming(JSON.parse(e.data)); } catch (err) { console.error(err); } };
+  ws.onclose = async () => {
+    checkConnection();
+    if (leaving) return;
+    let meInfo = null;
+    try { meInfo = await api('/api/me?role=motorista'); }
+    catch (err) { if (err.status === 401) { vid = null; me = null; return showServerLogin(); } }
+    if (meInfo && !meInfo.user.vehicleId) return showNoVehicle(meInfo.user);
+    setTimeout(connectServer, Math.min(10000, 1000 * 2 ** wsRetry++));
+  };
+}
+// conta ativa mas sem camião atribuído pela central
+function showNoVehicle(user) {
+  vid = null; me = null;
+  showScreen('connect');
+  $('connectMsg').classList.add('hidden');
+  $('connectHelp').classList.remove('hidden');
+  $('connectHelp').innerHTML = `<p class="font-bold text-zinc-200 text-sm">Sem camião atribuído</p>
+    <p>Olá ${esc(user.name.split(' ')[0])}, a tua conta não tem nenhum camião neste momento. Fala com a central; esta página liga-se sozinha quando te atribuírem um.</p>
+    <button id="noVehLogout" class="w-full py-3 rounded-xl bg-zinc-800 font-bold text-sm">Sair</button>`;
+  $('noVehLogout').onclick = () => { leaving = true; api('/api/logout', { method: 'POST', body: JSON.stringify({ role: 'motorista' }) }).finally(() => location.reload()); };
+  setTimeout(async () => { try { const r = await api('/api/me?role=motorista'); if (r.user.vehicleId) location.reload(); else showNoVehicle(r.user); } catch (e) { location.reload(); } }, 15000);
+}
+let pickVid = null;
+async function showServerLogin() {
+  showScreen('login');
+  let list = [];
+  try { list = await api('/api/motoristas'); } catch (e) { /* ignorar */ }
+  $('driverList').innerHTML = list.map(d => `
+    <li><button data-pick="${d.userId}" data-name="${esc(d.name)}" class="w-full text-left p-3.5 rounded-2xl bg-zinc-900 border ${pickVid === String(d.userId) ? 'border-white' : 'border-zinc-800 hover:border-zinc-600'} flex items-center gap-3">
+      <span class="w-10 h-10 rounded-full bg-zinc-800 text-xs font-bold flex items-center justify-center shrink-0">${initials(d.name)}</span>
+      <span class="flex-1 min-w-0"><span class="block text-sm font-bold">${esc(d.name)}</span><span class="block text-[11px] text-zinc-400">${esc(d.plate)}</span></span>
+      <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-500"></i></button></li>`).join('') || '<li class="text-sm text-zinc-500">Sem motoristas.</li>';
+  icons();
+}
+function pickDriver(id, name) {
+  pickVid = id;
+  $('pinName').textContent = name;
+  $('pinInput').value = ''; $('pinError').classList.add('hidden');
+  $('pinForm').classList.remove('hidden');
+  document.querySelectorAll('[data-pick]').forEach(b => { const on = b.dataset.pick === id; b.classList.toggle('border-white', on); b.classList.toggle('border-zinc-800', !on); });
+  $('pinInput').focus();
+}
+$('pinForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try {
+    await api('/api/login', { method: 'POST', body: JSON.stringify({ role: 'motorista', userId: +pickVid, pin: $('pinInput').value }) });
+    $('pinForm').classList.add('hidden');
+    thread = []; seenMsgs = 0; prev = { ahead: new Set(), msgs: -1, warned: false, pending: false, status: null };
+    resetDeliveryForm(); buildChecklist();
+    showScreen('connect'); $('connectMsg').classList.remove('hidden'); $('connectHelp').classList.add('hidden');
+    connectServer();
+  } catch (err) {
+    $('pinError').textContent = err.message; $('pinError').classList.remove('hidden');
+  }
+});
+
+function showScreen(name) {
+  $('screen-connect').classList.toggle('hidden', name !== 'connect');
+  $('screen-login').classList.toggle('hidden', name !== 'login');
+  $('app').classList.toggle('hidden', name !== 'app');
+}
+
+// ---------- Escolha de motorista ----------
+function renderLogin() {
+  $('driverList').innerHTML = state.vehicles.map(v => `
+    <li><button data-login="${v.id}" class="w-full text-left p-3.5 rounded-2xl bg-zinc-900 border border-zinc-800 hover:border-zinc-600 flex items-center gap-3">
+      <span class="w-10 h-10 rounded-full bg-zinc-800 text-xs font-bold flex items-center justify-center shrink-0">${initials(v.driver)}</span>
+      <span class="flex-1 min-w-0"><span class="block text-sm font-bold">${esc(v.driver)}</span><span class="block text-[11px] text-zinc-400 truncate">${v.plate} · ${esc(v.statusLabel)} · ${esc(v.location)}</span></span>
+      <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-500"></i></button></li>`).join('');
+  icons();
+}
+const initials = (n) => n.split(' ').map(x => x[0]).join('');
+function login(id) {
+  if (vid && vid !== id) post({ type: 'bye', vid });
+  vid = id; store.set('frota-motorista', id);
+  history.replaceState(null, '', '?v=' + id);
+  me = state.vehicles.find(v => v.id === id);
+  thread = []; seenMsgs = 0; prev = { ahead: new Set(), msgs: -1, warned: false, pending: false, status: null };
+  resetDeliveryForm(); buildChecklist();
+  hello(true);
+  showScreen('app'); setView('viagem');
+  onState();
+  setTimeout(() => miniMap && miniMap.invalidateSize(), 50);
+}
+
+// ---------- Estado recebido da central ----------
+function onState() {
+  if (!vid || !me) {
+    if (mode === 'demo') { if (vid && !me) vid = null; showScreen('login'); renderLogin(); }
+    return;
+  }
+  if ($('app').classList.contains('hidden')) { showScreen('app'); setView(view); }
+  notifyChanges();
+  renderHeader();
+  if (view === 'viagem') renderTrip();
+  if (view === 'entrega') renderDeliveryInfo();
+  if (view === 'veiculo') renderVehicle();
+  updateMap();
+  $('dlvBadge').classList.toggle('hidden', !me.deliveryPending);
+}
+
+function renderHeader() {
+  $('avatar').textContent = initials(me.driver);
+  $('hdrName').textContent = me.driver;
+  $('hdrSub').textContent = `${me.plate} · ${fmtTime(state.simNow)}${state.simSpeed > 1 ? ` · simulação ${state.simSpeed}×` : ''}`;
+}
+
+// Avisos no ecrã (o que um motorista precisa de saber sem procurar)
+function notifyChanges() {
+  // trânsito novo à frente
+  const keys = new Set(me.ahead.map(a => a.road + a.place));
+  me.ahead.forEach(a => { if (!prev.ahead.has(a.road + a.place) && prev.status !== null) toast('warn', `${a.type} à frente`, `${a.road} — ${a.place}, a ${a.km} km. Atraso ~${a.delay} min.`); });
+  prev.ahead = keys;
+  // pausa obrigatória a aproximar-se
+  if (me.status === 'rota' && me.contDrive >= 255 && !prev.warned) { prev.warned = true; toast('warn', 'Pausa obrigatória em 15 min', `Conduzes há ${fmtHM(me.contDrive)} seguidas (máx. 4h30). Procura uma área de serviço.`); }
+  if (me.contDrive < 200) prev.warned = false;
+  // chegada ao destino
+  if (me.deliveryPending && !prev.pending) toast('info', `Chegaste a ${me.destination}`, 'Confirma a entrega no separador Entrega.');
+  prev.pending = me.deliveryPending;
+  // fim da pausa
+  if (prev.status === 'pausa' && me.status === 'rota') toast('info', 'Pausa terminada', 'Boa viagem! Tempo contínuo reposto.');
+  prev.status = me.status;
+}
+
+function toast(kind, title, text) {
+  const cls = kind === 'warn' ? 'border-amber-500/50' : kind === 'msg' ? 'border-blue-500/50' : 'border-emerald-500/50';
+  const ico = kind === 'warn' ? 'triangle-alert' : kind === 'msg' ? 'message-square' : 'info';
+  const el = document.createElement('div');
+  el.className = `toast-in pointer-events-auto bg-zinc-900 border ${cls} rounded-2xl shadow-2xl p-3 flex gap-2.5 items-start`;
+  el.innerHTML = `<i data-lucide="${ico}" class="w-5 h-5 shrink-0 mt-0.5"></i><div class="min-w-0"><p class="text-sm font-bold">${esc(title)}</p><p class="text-xs text-zinc-400 leading-snug">${esc(text)}</p></div>`;
+  el.onclick = () => { el.remove(); if (kind === 'msg') setView('mensagens'); };
+  const box = $('toasts'); box.appendChild(el);
+  while (box.children.length > 3) box.firstChild.remove();
+  icons();
+  if (navigator.vibrate) try { navigator.vibrate(kind === 'warn' ? [120, 60, 120] : 80); } catch (e) { /* ignorar */ }
+  setTimeout(() => el.remove(), 6000);
+}
+
+// ---------- VIAGEM ----------
+function ring(pct, label, value, sub, color) {
+  const r = 34, c = 2 * Math.PI * r, off = c * (1 - clamp(pct, 0, 100) / 100);
+  return `<div class="flex flex-col items-center gap-1">
+    <div class="relative w-24 h-24">
+      <svg viewBox="0 0 80 80" class="w-full h-full -rotate-90"><circle cx="40" cy="40" r="${r}" fill="none" stroke="#27272a" stroke-width="7"/>
+        <circle cx="40" cy="40" r="${r}" fill="none" stroke="${color}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}"/></svg>
+      <div class="absolute inset-0 flex flex-col items-center justify-center"><span class="text-base font-extrabold">${value}</span><span class="text-[9px] text-zinc-500">${sub}</span></div>
+    </div>
+    <span class="text-[11px] font-semibold text-zinc-400">${label}</span></div>`;
+}
+
+function renderTrip() {
+  const v = me;
+  let top = '';
+  if (v.status === 'oficina') {
+    const w = v.workshop;
+    top = `<div class="rounded-2xl bg-red-950/40 border border-red-900 p-4 space-y-1">
+      <div class="text-xs font-bold text-red-400 flex items-center gap-1.5"><i data-lucide="wrench" class="w-4 h-4"></i>Camião em oficina</div>
+      <div class="text-base font-extrabold">${esc(w.name)}</div>
+      <div class="text-xs text-zinc-400">${esc(w.reason)}</div>
+      <div class="text-sm font-bold pt-1">${w.waitingParts ? 'A aguardar peças' : `Pronto daqui a ~${fmtHM(w.remainingH * 60)}`}</div>
+    </div>`;
+  } else {
+    const prog = clamp((1 - v.remainingKm / v.totalLen) * 100, 0, 100);
+    const delay = v.ahead.reduce((a, x) => a + x.delay, 0);
+    top = `<div class="rounded-2xl bg-zinc-900 border border-zinc-800 p-4">
+      <div class="flex items-center justify-between text-[11px] text-zinc-400 font-semibold">
+        <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ${v.status === 'rota' ? 'bg-emerald-500' : v.status === 'pausa' ? 'bg-amber-500' : 'bg-blue-500'}"></span>${esc(v.statusLabel)}</span>
+        <span>de ${esc(v.origin)}</span>
+      </div>
+      <div class="mt-2 text-[11px] text-zinc-500 font-semibold uppercase tracking-wide">Destino</div>
+      <div class="text-2xl font-extrabold leading-tight">${esc(v.destination)}</div>
+      <div class="mt-3 grid grid-cols-3 gap-2 text-center">
+        <div class="bg-zinc-950 rounded-xl py-2"><div class="text-[10px] text-zinc-500 font-semibold">Chegada</div><div class="text-sm font-extrabold">${v.eta ? fmtWhen(v.eta) : '—'}</div></div>
+        <div class="bg-zinc-950 rounded-xl py-2"><div class="text-[10px] text-zinc-500 font-semibold">Faltam</div><div class="text-sm font-extrabold">${fmtKm(v.remainingKm)}</div></div>
+        <div class="bg-zinc-950 rounded-xl py-2"><div class="text-[10px] text-zinc-500 font-semibold">Velocidade</div><div class="text-sm font-extrabold">${v.speed} km/h</div></div>
+      </div>
+      <div class="mt-3 h-1.5 bg-zinc-800 rounded-full overflow-hidden"><div class="h-full bg-white rounded-full" style="width:${prog}%"></div></div>
+      <div class="mt-1.5 flex justify-between text-[10px] text-zinc-500"><span><i data-lucide="map-pin" class="w-3 h-3 inline -mt-0.5"></i> ${esc(v.location)} · ${esc(v.terrain.toLowerCase())}</span>${delay ? `<span class="text-amber-400 font-bold">+${delay} min trânsito</span>` : ''}</div>
+    </div>`;
+    if (v.deliveryPending) top += `<button data-goview="entrega" class="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 font-extrabold text-sm inline-flex items-center justify-center gap-2"><i data-lucide="package-check" class="w-5 h-5"></i>Confirmar entrega em ${esc(v.destination)}</button>`;
+  }
+  $('tripTop').innerHTML = top;
+
+  // tempos de condução + ações
+  const contLeft = 270 - v.contDrive, dayLeft = 540 - v.dayDrive;
+  const contColor = v.contDrive >= 255 ? '#ef4444' : v.contDrive >= 230 ? '#f59e0b' : '#22c55e';
+  let pauseInfo = '';
+  if (v.status === 'pausa') {
+    pauseInfo = `<div class="rounded-xl bg-amber-500/10 border border-amber-500/30 p-3 text-xs text-amber-300 font-semibold flex items-center gap-2"><i data-lucide="coffee" class="w-4 h-4"></i>${v.pauseLeft > 60 ? 'Descanso diário' : 'Pausa'} — faltam ${fmtHM(v.pauseLeft)} (retomas às ${fmtTime(state.simNow + v.pauseLeft * 60000)})</div>`;
+  } else if (v.status === 'rota') {
+    pauseInfo = `<div class="text-xs text-zinc-400 text-center">Próxima pausa obrigatória daqui a <b class="text-white">${fmtHM(Math.max(0, contLeft))}</b> · fim do dia de condução em <b class="text-white">${fmtHM(Math.max(0, dayLeft))}</b></div>`;
+  }
+  let actions = '';
+  if (v.status === 'rota') actions = `<button data-act="pausa" class="w-full py-3.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 font-bold text-sm inline-flex items-center justify-center gap-2"><i data-lucide="coffee" class="w-4 h-4"></i>Iniciar pausa (45 min)</button>`;
+  if (v.status === 'pausa') actions = `<button data-act="retomar" class="w-full py-3.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 font-bold text-sm inline-flex items-center justify-center gap-2"><i data-lucide="play" class="w-4 h-4"></i>Retomar condução</button>`;
+
+  const ahead = v.ahead.length ? `<div class="rounded-2xl bg-zinc-900 border border-zinc-800 p-4 space-y-2">
+      <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-wide flex items-center gap-1.5"><i data-lucide="traffic-cone" class="w-4 h-4"></i>Trânsito na tua rota</h3>
+      ${v.ahead.sort((a, b) => a.km - b.km).map(a => `<div class="flex items-center gap-3 text-sm"><span class="w-9 h-9 rounded-xl ${a.type === 'Acidente' ? 'bg-red-500/15 text-red-400' : 'bg-amber-500/15 text-amber-400'} flex items-center justify-center shrink-0"><i data-lucide="${a.type === 'Acidente' ? 'car-front' : a.type === 'Obras' ? 'construction' : 'triangle-alert'}" class="w-4 h-4"></i></span>
+        <span class="flex-1 min-w-0"><b>${esc(a.type)}</b> · ${esc(a.road)} ${esc(a.place)}<br><span class="text-[11px] text-zinc-500">a ${a.km} km · atraso ~${a.delay} min</span></span></div>`).join('')}
+    </div>` : '';
+
+  $('tripBottom').innerHTML = `
+    <div class="rounded-2xl bg-zinc-900 border border-zinc-800 p-4 space-y-3">
+      <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-wide flex items-center gap-1.5"><i data-lucide="timer" class="w-4 h-4"></i>Tempos de condução</h3>
+      <div class="grid grid-cols-2">
+        ${ring(v.contDrive / 270 * 100, 'Contínua (máx. 4h30)', fmtHM(v.contDrive), `faltam ${fmtHM(Math.max(0, contLeft))}`, contColor)}
+        ${ring(v.dayDrive / 540 * 100, 'Hoje (máx. 9h)', fmtHM(v.dayDrive), `faltam ${fmtHM(Math.max(0, dayLeft))}`, v.dayDrive >= 480 ? '#f59e0b' : '#a1a1aa')}
+      </div>
+      ${pauseInfo}
+      ${actions}
+    </div>
+    ${ahead}
+    <div class="rounded-2xl bg-zinc-900 border border-zinc-800 p-4">
+      <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-wide flex items-center gap-1.5 mb-2"><i data-lucide="package" class="w-4 h-4"></i>Carga</h3>
+      <div class="text-sm font-bold">${esc(v.cargo.desc)}</div>
+      <div class="flex justify-between text-xs text-zinc-400 mt-1 mb-1.5"><span>${v.cargo.kg.toLocaleString('pt-PT')} kg de ${v.cargo.cap.toLocaleString('pt-PT')} kg</span><span class="font-bold">${Math.round(v.cargo.kg / v.cargo.cap * 100)}%</span></div>
+      <div class="h-1.5 bg-zinc-800 rounded-full overflow-hidden"><div class="h-full rounded-full ${v.cargo.kg > v.cargo.cap ? 'bg-red-500' : 'bg-blue-500'}" style="width:${clamp(v.cargo.kg / v.cargo.cap * 100, 0, 100)}%"></div></div>
+    </div>`;
+  icons();
+}
+
+// ---------- Mini mapa ----------
+let miniMap = null, routeLine = null, meMarker = null, mapRouteSig = '';
+function initMap() {
+  miniMap = L.map('miniMap', { zoomControl: false, attributionControl: true, dragging: true, scrollWheelZoom: false });
+  const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/';
+  L.tileLayer(ESRI + 'World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16, attribution: 'Esri, HERE, Garmin, © OpenStreetMap' }).addTo(miniMap);
+  L.tileLayer(ESRI + 'World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16 }).addTo(miniMap);
+  miniMap.setView([42, -3], 5);
+}
+function updateMap() {
+  if (!miniMap || !me) return;
+  const sig = me.id + me.dir + me.path.length;
+  if (sig !== mapRouteSig) {
+    mapRouteSig = sig;
+    if (routeLine) miniMap.removeLayer(routeLine);
+    routeLine = L.polyline(me.path, { color: '#e4e4e7', weight: 4, opacity: 0.8 }).addTo(miniMap);
+    if (!meMarker) meMarker = L.marker(me.pos, { icon: L.divIcon({ className: 'me-marker', html: '<div class="me-dot"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }) }).addTo(miniMap);
+    miniMap.fitBounds(routeLine.getBounds(), { padding: [18, 18] });
+  }
+  meMarker.setLatLng(me.pos);
+}
+
+// ---------- MENSAGENS ----------
+const QUICK = ['Tudo ok 👍', 'Vou fazer pausa agora.', 'Trânsito, vou atrasar ~15 min.', 'Cheguei ao destino.', 'Liga-me quando puderes.'];
+function onThread(messages) {
+  const newFromBase = messages.slice(thread.length).filter(m => m.from === 'base');
+  const first = prev.msgs === -1;
+  thread = messages; prev.msgs = messages.length;
+  if (view === 'mensagens') { seenMsgs = thread.length; }
+  else if (first) { seenMsgs = thread.length; }
+  else newFromBase.forEach(m => toast('msg', 'Mensagem da central', m.text));
+  renderChat(); renderMsgBadge();
+}
+function renderMsgBadge() {
+  const n = thread.slice(seenMsgs).filter(m => m.from === 'base').length;
+  $('msgBadge').textContent = n; $('msgBadge').classList.toggle('hidden', !n);
+}
+function renderChat() {
+  $('chatList').innerHTML = thread.map(m => `
+    <div class="flex ${m.from === 'driver' ? 'justify-end' : 'justify-start'}">
+      <div class="max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm ${m.from === 'driver' ? 'bg-blue-600 text-white rounded-br-md' : 'bg-zinc-800 rounded-bl-md'}">
+        ${m.from === 'base' ? '<div class="text-[10px] font-bold text-zinc-400 mb-0.5">Central</div>' : ''}${esc(m.text)}
+        <div class="text-[10px] mt-1 ${m.from === 'driver' ? 'text-blue-200' : 'text-zinc-500'}">${fmtDate(m.time)} ${fmtTime(m.time)}</div>
+      </div></div>`).join('') || '<p class="text-center text-xs text-zinc-500 py-8">Ainda sem mensagens.</p>';
+  if (view === 'mensagens') document.querySelector('main').scrollTop = 1e6;
+}
+function sendMsg(text) {
+  text = text.trim();
+  if (!text || !vid) return;
+  post({ type: 'msg', vid, text });
+  $('chatInput').value = '';
+}
+$('quickReplies').innerHTML = QUICK.map(q => `<button type="button" data-quick="${esc(q)}" class="shrink-0 text-xs font-semibold px-3 py-2 rounded-full bg-zinc-900 border border-zinc-800 hover:border-zinc-600 whitespace-nowrap">${esc(q)}</button>`).join('');
+$('chatForm').addEventListener('submit', (e) => { e.preventDefault(); sendMsg($('chatInput').value); });
+
+// ---------- ENTREGA ----------
+let photoData = null, sigDirty = false;
+function renderDeliveryInfo() {
+  const v = me;
+  const pending = v.deliveryPending;
+  $('deliveryForm').classList.toggle('hidden', !pending);
+  if (pending) {
+    $('deliveryInfo').innerHTML = `<div class="rounded-2xl bg-blue-500/10 border border-blue-500/30 p-4 text-sm"><b>${esc(v.cargo.desc)}</b><br><span class="text-xs text-zinc-400">${v.cargo.kg.toLocaleString('pt-PT')} kg · ${esc(v.destination)}</span></div>`;
+  } else if (v.status === 'oficina') {
+    $('deliveryInfo').innerHTML = `<div class="rounded-2xl bg-zinc-900 border border-zinc-800 p-5 text-center text-sm text-zinc-400">O camião está na oficina. Sem entregas para confirmar.</div>`;
+  } else {
+    $('deliveryInfo').innerHTML = `<div class="rounded-2xl bg-zinc-900 border border-zinc-800 p-5 text-center space-y-2">
+      <i data-lucide="map-pinned" class="w-8 h-8 mx-auto text-zinc-500"></i>
+      <p class="text-sm font-bold">Ainda a caminho de ${esc(v.destination)}</p>
+      <p class="text-xs text-zinc-400">Faltam ${fmtKm(v.remainingKm)}${v.eta ? ` · chegada prevista ${fmtWhen(v.eta)}` : ''}. O formulário abre quando chegares.</p>
+      <p class="text-[11px] text-zinc-500">Demonstração: no painel da central, põe a velocidade em 300× para chegar mais depressa (ex.: João Silva, Porto → Lisboa).</p>
+    </div>`;
+  }
+  icons();
+}
+function resetDeliveryForm() {
+  photoData = null; sigDirty = false;
+  $('dlvName').value = ''; $('dlvNotes').value = ''; $('dlvPhoto').value = '';
+  $('photoPreview').classList.add('hidden'); $('photoHint').classList.remove('hidden');
+  $('dlvError').classList.add('hidden');
+  clearSig();
+}
+$('dlvPhoto').addEventListener('change', (e) => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  const img = new Image();
+  img.onload = () => {
+    // reduzir a foto (máx. 640 px) para não pesar na ligação
+    const k = Math.min(1, 640 / Math.max(img.width, img.height));
+    const c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    photoData = c.toDataURL('image/jpeg', 0.7);
+    $('photoPreview').src = photoData; $('photoPreview').classList.remove('hidden'); $('photoHint').classList.add('hidden');
+    URL.revokeObjectURL(img.src);
+  };
+  img.src = URL.createObjectURL(f);
+});
+
+// assinatura
+const sig = $('sigPad'), sctx = sig.getContext('2d');
+let drawing = false, last = null;
+function sizeSig() {
+  const r = sig.getBoundingClientRect();
+  if (!r.width) return;
+  const dpr = window.devicePixelRatio || 1;
+  sig.width = r.width * dpr; sig.height = r.height * dpr;
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  clearSig();
+}
+function clearSig() {
+  sctx.save(); sctx.setTransform(1, 0, 0, 1, 0, 0); sctx.fillStyle = '#fff'; sctx.fillRect(0, 0, sig.width, sig.height); sctx.restore();
+  sctx.strokeStyle = '#111827'; sctx.lineWidth = 2.4; sctx.lineCap = 'round'; sctx.lineJoin = 'round';
+  sigDirty = false;
+}
+const ptr = (e) => { const r = sig.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+sig.addEventListener('pointerdown', (e) => { drawing = true; last = ptr(e); sig.setPointerCapture(e.pointerId); });
+sig.addEventListener('pointermove', (e) => {
+  if (!drawing) return;
+  const p = ptr(e);
+  sctx.beginPath(); sctx.moveTo(last[0], last[1]); sctx.lineTo(p[0], p[1]); sctx.stroke();
+  last = p; sigDirty = true;
+});
+['pointerup', 'pointercancel'].forEach(t => sig.addEventListener(t, () => { drawing = false; }));
+$('sigClear').addEventListener('click', clearSig);
+
+$('deliveryForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = $('dlvName').value.trim();
+  const err = !name ? 'Escreve o nome de quem recebe.' : !sigDirty ? 'Falta a assinatura de quem recebe.' : '';
+  if (err) { $('dlvError').textContent = err; $('dlvError').classList.remove('hidden'); return; }
+  post({ type: 'entrega', vid, receiver: name, notes: $('dlvNotes').value.trim(), photo: photoData, signature: sig.toDataURL('image/png') });
+  resetDeliveryForm();
+  toast('info', 'Entrega enviada', 'A central já tem a confirmação, a foto e a assinatura.');
+  setView('viagem');
+});
+
+// ---------- VEÍCULO ----------
+const CHECK_ITEMS = [
+  ['pneus', 'Pneus (pressão, cortes, piso)'], ['luzes', 'Luzes, piscas e luzes de travão'], ['travoes', 'Travões e ar comprimido'],
+  ['niveis', 'Níveis (óleo, AdBlue, refrigerante)'], ['vidros', 'Espelhos, para-brisas e escovas'], ['fugas', 'Sem fugas debaixo do camião'],
+  ['carga', 'Carga bem amarrada / portas fechadas'], ['docs', 'Documentos (CMR, cartão do tacógrafo)'], ['kit', 'Colete, triângulo e extintor'],
+];
+function buildChecklist() {
+  $('chkForm').innerHTML = CHECK_ITEMS.map(([k, label]) => `
+    <div class="rounded-xl bg-zinc-950 border border-zinc-800 p-2.5" data-item="${k}">
+      <div class="flex items-center gap-2">
+        <span class="flex-1 text-sm">${label}</span>
+        <button type="button" class="chk-btn ok px-3 py-1.5 rounded-lg border border-zinc-700 text-xs font-bold" data-chk="${k}" data-val="ok" aria-pressed="false">OK</button>
+        <button type="button" class="chk-btn bad px-3 py-1.5 rounded-lg border border-zinc-700 text-xs font-bold" data-chk="${k}" data-val="bad" aria-pressed="false">Problema</button>
+      </div>
+      <input type="text" maxlength="120" placeholder="Descreve o problema" class="chk-note hidden mt-2 w-full px-3 py-2 text-sm bg-zinc-900 border border-zinc-800 rounded-lg focus:outline-none focus:border-zinc-600" />
+    </div>`).join('') + `
+    <p id="chkError" class="hidden text-xs text-amber-400"></p>
+    <div class="grid grid-cols-[auto_1fr] gap-2 pt-1">
+      <button type="button" id="chkAllOk" class="px-3 py-3 rounded-xl bg-zinc-800 text-xs font-bold">Tudo OK</button>
+      <button class="py-3 rounded-xl bg-white text-zinc-900 text-sm font-extrabold">Enviar checklist</button>
+    </div>`;
+}
+function setChk(k, val) {
+  const row = document.querySelector(`[data-item="${k}"]`);
+  row.querySelectorAll('.chk-btn').forEach(b => b.setAttribute('aria-pressed', b.dataset.val === val));
+  row.querySelector('.chk-note').classList.toggle('hidden', val !== 'bad');
+  row.dataset.val = val;
+}
+$('chkForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const rows = [...document.querySelectorAll('[data-item]')];
+  if (rows.some(r => !r.dataset.val)) { $('chkError').textContent = 'Marca todos os pontos como OK ou Problema.'; $('chkError').classList.remove('hidden'); return; }
+  const items = rows.map(r => ({ name: CHECK_ITEMS.find(c => c[0] === r.dataset.item)[1], ok: r.dataset.val === 'ok', note: r.querySelector('.chk-note').value.trim() }));
+  post({ type: 'checklist', vid, items });
+  const bad = items.filter(i => !i.ok).length;
+  toast(bad ? 'warn' : 'info', 'Checklist enviada', bad ? `${bad} problema(s) reportados à central.` : 'Tudo em ordem. Boa viagem!');
+  buildChecklist();
+});
+
+function renderVehicle() {
+  const v = me;
+  $('vehInfo').innerHTML = `<div class="rounded-2xl bg-zinc-900 border border-zinc-800 p-4 flex items-center gap-3">
+    <span class="w-12 h-12 rounded-2xl bg-zinc-800 flex items-center justify-center"><i data-lucide="truck" class="w-6 h-6"></i></span>
+    <div class="flex-1"><div class="text-lg font-extrabold">${v.plate}</div><div class="text-xs text-zinc-400">${esc(v.model)} · ${fmtKm(v.odometer)}</div></div>
+    <div class="text-right"><div class="text-[10px] text-zinc-500 font-semibold">Hoje</div><div class="text-sm font-extrabold">${fmtKm(v.kmToday)}</div></div></div>`;
+  $('chkLast').textContent = v.lastChecklist ? `Última: ${fmtDate(v.lastChecklist.time)} ${fmtTime(v.lastChecklist.time)}${v.lastChecklist.issues ? ` · ${v.lastChecklist.issues} problema(s)` : ' · ok'}` : 'Ainda não feita hoje';
+  const docNames = { ipo: 'Inspeção (IPO)', seguro: 'Seguro', tacografo: 'Tacógrafo' };
+  const wear = (p) => p >= 95 ? 'bg-red-500' : p >= 85 ? 'bg-amber-500' : p >= 70 ? 'bg-yellow-400' : 'bg-emerald-500';
+  $('partsBox').innerHTML = `<div class="rounded-2xl bg-zinc-900 border border-zinc-800 p-4 space-y-3">
+      <h2 class="text-sm font-extrabold flex items-center gap-1.5"><i data-lucide="cog" class="w-4 h-4"></i>Estado das peças</h2>
+      <p class="text-[11px] text-zinc-500 -mt-2">Calculado pela central com os km, o peso da carga e o terreno.</p>
+      ${v.parts.slice(0, 5).map(p => `<div><div class="flex justify-between text-xs mb-1"><span>${esc(p.name)}</span><span class="font-bold ${p.pct >= 85 ? 'text-amber-400' : 'text-zinc-400'}">${p.pct.toFixed(0)}% · ~${fmtKm(p.km)}</span></div>
+        <div class="h-1.5 bg-zinc-800 rounded-full overflow-hidden"><div class="h-full rounded-full ${wear(p.pct)}" style="width:${clamp(p.pct, 0, 100)}%"></div></div></div>`).join('')}
+    </div>
+    <div class="grid grid-cols-3 gap-2 mt-4">${Object.entries(v.docs).map(([k, d]) => `
+      <div class="rounded-xl border p-2.5 ${d <= 7 ? 'border-red-800 bg-red-950/40' : d <= 30 ? 'border-amber-800 bg-amber-950/30' : 'border-zinc-800 bg-zinc-900'}">
+        <div class="text-[10px] text-zinc-400 font-semibold">${docNames[k]}</div><div class="text-sm font-extrabold">${d} dias</div></div>`).join('')}</div>`;
+  icons();
+}
+
+// ---------- SOS ----------
+let sosKind = null;
+function openSos() {
+  sosKind = null; $('sosText').value = ''; $('sosSend').disabled = true;
+  document.querySelectorAll('.sos-kind').forEach(b => b.classList.remove('bg-red-600', 'border-red-600'));
+  $('sosForm').classList.remove('hidden'); $('sosDone').classList.add('hidden');
+  $('sosModal').classList.remove('hidden');
+}
+
+// ---------- Navegação ----------
+function setView(name) {
+  view = name;
+  ['viagem', 'mensagens', 'entrega', 'veiculo'].forEach(v => $('view-' + v).classList.toggle('hidden', v !== name));
+  document.querySelectorAll('.nav-btn').forEach(b => b.toggleAttribute('aria-current', b.dataset.view === name));
+  document.querySelectorAll('.nav-btn[aria-current]').forEach(b => b.setAttribute('aria-current', 'page'));
+  if (name === 'mensagens') { seenMsgs = thread.length; renderMsgBadge(); renderChat(); }
+  if (name === 'entrega') { renderDeliveryInfo(); requestAnimationFrame(sizeSig); }
+  if (name === 'viagem') { setTimeout(() => { if (!miniMap) return; miniMap.invalidateSize(); if (routeLine) miniMap.fitBounds(routeLine.getBounds(), { padding: [18, 18] }); }, 30); }
+  if (me) { if (name === 'viagem') renderTrip(); if (name === 'veiculo') renderVehicle(); }
+  if (name !== 'mensagens') document.querySelector('main').scrollTop = 0;
+}
+
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('button, a');
+  if (!t) return;
+  const d = t.dataset;
+  if (d.login) login(d.login);
+  if (d.view) setView(d.view);
+  if (d.goview) setView(d.goview);
+  if (d.quick) sendMsg(d.quick);
+  if (d.chk) setChk(d.chk, d.val);
+  if (t.id === 'chkAllOk') CHECK_ITEMS.forEach(([k]) => setChk(k, 'ok'));
+  if (d.act === 'pausa') post({ type: 'pausa', vid });
+  if (d.act === 'retomar') {
+    const ok = me.pauseLeft <= 0 || confirm(`A pausa ainda não chegou aos 45 minutos (faltam ${fmtHM(me.pauseLeft)}). Se retomares agora, o tempo contínuo não é reposto e a central é avisada. Continuar?`);
+    if (ok) post({ type: 'retomar', vid });
+  }
+  if (t.id === 'sosBtn') openSos();
+  if (t.id === 'sosClose') $('sosModal').classList.add('hidden');
+  if (d.kind) {
+    sosKind = d.kind; $('sosSend').disabled = false;
+    document.querySelectorAll('.sos-kind').forEach(b => { const on = b === t; b.classList.toggle('bg-red-600', on); b.classList.toggle('border-red-600', on); });
+  }
+  if (t.id === 'sosSend' && sosKind) {
+    post({ type: 'sos', vid, kind: sosKind, text: $('sosText').value.trim() });
+    $('sosForm').classList.add('hidden'); $('sosDone').classList.remove('hidden');
+    if (navigator.vibrate) try { navigator.vibrate([200, 100, 200]); } catch (err) { /* ignorar */ }
+  }
+  if (d.pick) pickDriver(d.pick, d.name);
+  if (t.id === 'whoBtn' && mode === 'servidor') {
+    if (confirm('Terminar sessão nesta app?')) {
+      leaving = true;
+      api('/api/logout', { method: 'POST', body: JSON.stringify({ role: 'motorista' }) }).finally(() => location.reload());
+    }
+  } else if (t.id === 'whoBtn') {
+    if (confirm('Trocar de motorista?')) { post({ type: 'bye', vid }); vid = null; me = null; store.set('frota-motorista', ''); history.replaceState(null, '', location.pathname); showScreen('login'); if (state) renderLogin(); }
+  }
+});
+window.addEventListener('resize', () => { if (view === 'entrega') sizeSig(); });
+
+// ---------- Arranque ----------
+if (!bus) { $('connectMsg').textContent = 'Este browser não suporta a ligação de demonstração (BroadcastChannel).'; }
+initMap();
+buildChecklist();
+icons();
+(async function boot() {
+  let health = null;
+  if (location.protocol.startsWith('http')) {
+    try { const r = await fetch('/api/health', { cache: 'no-store' }); if (r.ok) health = await r.json(); } catch (e) { /* sem servidor */ }
+  }
+  if (health && health.app === 'gestao-frota') {
+    mode = 'servidor';
+    $('loginTitle').textContent = 'Entrar';
+    $('loginSub').textContent = 'Escolhe o teu nome e escreve o PIN (na versão final seria com o cartão de condutor do tacógrafo).';
+    try { const r = await api('/api/me?role=motorista'); if (r.user.vehicleId) connectServer(); else showNoVehicle(r.user); }
+    catch (e) { showServerLogin(); }
+  } else {
+    mode = 'demo';
+    vid = new URLSearchParams(location.search).get('v') || store.get('frota-motorista') || null;
+    hello(true);
+  }
+})();
+</script>
+</body>
+</html>

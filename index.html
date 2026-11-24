@@ -270,6 +270,51 @@
       </div>
     </article>
 
+    <!-- Gestão de Frota (demo em ./Frota, copiada do projeto Gestao-Frota) -->
+    <article class="bg-white rounded-3xl border border-zinc-200/80 shadow-sm overflow-hidden mb-6">
+      <div class="grid lg:grid-cols-2">
+
+        <a href="./Frota/index.html" aria-label="Abrir demonstração da Gestão de Frota" class="lg:order-2 bg-zinc-100 border-b lg:border-b-0 lg:border-l border-zinc-200/80 p-5 sm:p-8 flex items-center">
+          <img src="./img/gestao-frota.webp" width="1440" height="864" loading="lazy" alt="Painel da Gestão de Frota: lista de camiões, mapa da Europa com as posições e ficha de um camião" class="w-full h-auto rounded-xl border border-zinc-200 shadow-md" />
+        </a>
+
+        <div class="p-6 sm:p-10">
+          <div class="flex flex-wrap items-center gap-2 mb-4">
+            <span class="text-[11px] font-bold text-zinc-500 uppercase tracking-wide">Full-Stack · 2026</span>
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700">Projeto pessoal</span>
+          </div>
+          <h3 class="text-xl sm:text-2xl font-extrabold text-zinc-950 mb-3">Gestão de Frota de Transportes</h3>
+          <p class="text-zinc-600 text-sm sm:text-base leading-relaxed mb-6">
+            Sistema para uma empresa de transportes, com painel da central, app do motorista e portal das oficinas.
+            Os camiões são simulados no servidor.
+          </p>
+
+          <ul class="space-y-3 text-sm text-zinc-700 mb-6">
+            <li class="flex gap-3"><i data-lucide="map" class="w-4 h-4 mt-0.5 shrink-0 text-zinc-400"></i><span>Mapa em tempo real com <strong>WebSockets</strong>, alertas e mensagens entre a central e os motoristas.</span></li>
+            <li class="flex gap-3"><i data-lucide="server" class="w-4 h-4 mt-0.5 shrink-0 text-zinc-400"></i><span><strong>API REST</strong> em Node.js e Express, com base de dados <strong>SQLite</strong>.</span></li>
+            <li class="flex gap-3"><i data-lucide="shield-check" class="w-4 h-4 mt-0.5 shrink-0 text-zinc-400"></i><span>Perfis de gestor, motorista e oficina, sessões em cookies HttpOnly e palavras-passe cifradas com <strong>scrypt</strong>.</span></li>
+            <li class="flex gap-3"><i data-lucide="chart-column" class="w-4 h-4 mt-0.5 shrink-0 text-zinc-400"></i><span>Relatórios de custos e margem, com gráficos e exportação para CSV.</span></li>
+          </ul>
+
+          <div class="flex flex-wrap gap-1.5 mb-6">
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">Node.js</span>
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">Express.js</span>
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">WebSockets</span>
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">SQLite</span>
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">JavaScript</span>
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">Tailwind CSS</span>
+            <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-800 font-medium">Leaflet</span>
+          </div>
+
+          <a href="./Frota/index.html" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-800 transition-all">
+            Ver demo <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          </a>
+          <p class="text-xs text-zinc-500 mt-3">A demo corre no browser, sem servidor, com dados simulados. Código em breve.</p>
+        </div>
+
+      </div>
+    </article>
+
     <div class="grid md:grid-cols-3 gap-6">
 
       <!-- Sistema de Gestão de Atletas (em desenvolvimento) -->
@@ -382,7 +427,7 @@
           <ul class="text-sm text-zinc-600 space-y-1.5">
             <li>Node.js e Express.js</li>
             <li>Python e Flask</li>
-            <li>APIs REST</li>
+            <li>APIs REST e WebSockets</li>
             <li>Autenticação JWT e bcrypt</li>
           </ul>
         </div>
